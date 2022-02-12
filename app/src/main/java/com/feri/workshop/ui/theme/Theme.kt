@@ -48,5 +48,5 @@ fun WorkshopTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composab
         content = content
     )
     val context = LocalContext.current
-    (context as ComponentActivity).window.statusBarColor = PrimaryColor.hashCode()
+    (context as ComponentActivity).window.statusBarColor = SurfaceColor.hashCode()
 }

@@ -6,10 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import com.feri.workshop.screen.*
 import com.feri.workshop.ui.theme.WorkshopTheme
 import com.feri.workshop.ui.helper.BottomNavigationBar
@@ -27,6 +24,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberAnimatedNavController()
             var showBottomBar by remember { mutableStateOf(false) }
+            val currentAccount by remember{mainViewModel.currentAccount}
             WorkshopTheme(darkTheme = true) {
                 Scaffold(bottomBar = {
                     if (showBottomBar) BottomNavigationBar(
@@ -44,7 +42,7 @@ class MainActivity : ComponentActivity() {
                 }) {
                     AnimatedNavHost(
                         navController = navController,
-                        startDestination = Beranda.name
+                        startDestination = Splash.name
                     ) {
                         composable(Beranda.name) {
                             showBottomBar = Beranda.showBottomNav
@@ -109,6 +107,12 @@ class MainActivity : ComponentActivity() {
                         composable(ListFinancial.name) {
                             showBottomBar = ListFinancial.showBottomNav
                             ListFinancial.screen(navController)
+                        }
+                    }.also {
+                        LaunchedEffect(key1 = currentAccount){
+                            if (currentAccount==null) navController.navigate(Login.name){
+                                navController.backQueue.clear()
+                            }
                         }
                     }
                 }

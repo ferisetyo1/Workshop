@@ -7,9 +7,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun dividerSmall() {
-    Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().background(color = Color.White.copy(alpha = 0.5f)))
+fun dividerSmallH(height: Dp) {
+    Spacer(
+        modifier = Modifier
+            .height(height = height)
+            .fillMaxWidth()
+            .background(color = Color.White.copy(alpha = 0.5f))
+    )
 }
