@@ -24,12 +24,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberAnimatedNavController()
             var showBottomBar by remember { mutableStateOf(false) }
-            val currentAccount by remember{mainViewModel.currentAccount}
+            val currentAccount by remember { mainViewModel.currentAccount }
             WorkshopTheme(darkTheme = true) {
                 Scaffold(bottomBar = {
                     if (showBottomBar) BottomNavigationBar(
                         navController = navController,
-                        items = listOf(Beranda,ManagementProduk,Reminder, Profile),
+                        items = listOf(Beranda, ManagementProduk, Reminder, Profile),
                         onItemClick = {
                             navController.navigate(it.name) {
                                 if (it.name != Beranda.name) {
@@ -109,8 +109,8 @@ class MainActivity : ComponentActivity() {
                             ListFinancial.screen(navController)
                         }
                     }.also {
-                        LaunchedEffect(key1 = currentAccount){
-                            if (currentAccount==null) navController.navigate(Login.name){
+                        LaunchedEffect(key1 = currentAccount) {
+                            if (currentAccount == null) navController.navigate(Login.name) {
                                 navController.backQueue.clear()
                             }
                         }
@@ -119,4 +119,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
+

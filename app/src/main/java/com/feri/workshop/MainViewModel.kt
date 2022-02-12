@@ -13,7 +13,27 @@ class MainViewModel : ViewModel() {
         checkAccount()
     }
 
-    fun checkAccount(){
-        currentAccount.value=Firebase.auth.currentUser
+    fun checkAccount() {
+        currentAccount.value = Firebase.auth.currentUser
+    }
+
+    fun login(
+        username: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        Firebase
+            .auth
+            .signInWithEmailAndPassword(username, password)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    currentAccount.value = it.result.user
+                    onSuccess()
+                } else {
+                    onError(it.exception?.message.orEmpty())
+                }
+            }
+
     }
 }
