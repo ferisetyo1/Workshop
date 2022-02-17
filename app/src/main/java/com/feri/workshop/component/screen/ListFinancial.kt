@@ -1,10 +1,10 @@
-package com.feri.workshop.screen
+package com.feri.workshop.component.screen
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 
-object FindCustomer : Screen {
-    override val name = "FindCustomer"
+object ListFinancial : Screen {
+    override val name = "ListFinancial"
 
     @Composable
     override fun screen(navController: NavHostController) {

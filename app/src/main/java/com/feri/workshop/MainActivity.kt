@@ -1,26 +1,33 @@
 package com.feri.workshop
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
-import com.feri.workshop.screen.*
-import com.feri.workshop.ui.theme.WorkshopTheme
+import androidx.compose.ui.ExperimentalComposeUiApi
+import com.feri.workshop.component.screen.*
 import com.feri.workshop.ui.helper.BottomNavigationBar
+import com.feri.workshop.ui.theme.WorkshopTheme
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import dagger.hilt.android.AndroidEntryPoint
 
-@ExperimentalAnimationApi
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     val mainViewModel by viewModels<MainViewModel>()
 
+    @ExperimentalAnimationApi
+    @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         setContent {
             val navController = rememberAnimatedNavController()
             var showBottomBar by remember { mutableStateOf(false) }
@@ -83,6 +90,10 @@ class MainActivity : ComponentActivity() {
                         composable(FindCustomer.name) {
                             showBottomBar = FindCustomer.showBottomNav
                             FindCustomer.screen(navController)
+                        }
+                        composable(ListCustomer.name) {
+                            showBottomBar = ListCustomer.showBottomNav
+                            ListCustomer.screen(navController)
                         }
                         composable(AntrianService.name) {
                             showBottomBar = AntrianService.showBottomNav

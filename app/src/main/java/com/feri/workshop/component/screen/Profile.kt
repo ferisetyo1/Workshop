@@ -1,7 +1,8 @@
-package com.feri.workshop.screen
+package com.feri.workshop.component.screen
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -17,10 +18,13 @@ object Profile : Screen {
     @ExperimentalAnimationApi
     @Composable
     override fun screen(navController: NavHostController) {
-        val activity = LocalContext.current as MainActivity
-        
+        val context = LocalContext.current
+        val activity = context as MainActivity
+        val mainVM = activity.mainViewModel
         Column {
-            Text(text = "")
+            Button(onClick = { mainVM.logOut() }) {
+                Text(text = "Logout")
+            }
         }
     }
 }

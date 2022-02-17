@@ -1,6 +1,6 @@
-package com.feri.workshop.screen
+package com.feri.workshop.component.screen
 
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,6 +11,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.Assessment
@@ -31,13 +32,13 @@ import com.feri.workshop.R
 import com.feri.workshop.ui.helper.dividerSmallH
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
+import com.feri.workshop.ui.theme.PrimaryColor
 
 object Beranda : Screen {
     override val name: String = "Beranda"
     override val icon: Int = R.drawable.ic_home
     override val showBottomNav: Boolean = true
 
-    @ExperimentalAnimationApi
     @Composable
     override fun screen(navController: NavHostController) {
         val activity = LocalContext.current as MainActivity
@@ -66,7 +67,7 @@ object Beranda : Screen {
                     .fillMaxWidth(0.9f)
                     .align(Alignment.CenterHorizontally)
                     .padding(horizontal = 16.dp),
-                backgroundColor = Color.Black,
+                backgroundColor = PrimaryColor.copy(alpha = 0.75f),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -85,9 +86,9 @@ object Beranda : Screen {
                             modifier = Modifier.weight(1f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(text = "Order Hari Ini")
+                            Text(text = "Order Hari Ini",fontSize = 12.sp)
                             spacerV(height = 16.dp)
-                            Text(text = "8")
+                            Text(text = "8",fontSize = 18.sp,fontWeight = FontWeight.W500)
                         }
                     }
                     spacerV(height = 16.dp)
@@ -122,7 +123,7 @@ object Beranda : Screen {
             )
             spacerV(height = 16.dp)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally,modifier = Modifier.clickable { navController.navigate(FindCustomer.name) }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_inventory_black_24dp_1),
                         contentDescription = ""
@@ -137,13 +138,13 @@ object Beranda : Screen {
                     )
                     Text(text = "Catatan\nFinansial",textAlign = TextAlign.Center)
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally,modifier = Modifier.clickable { navController.navigate(ListCustomer.name) }) {
                     Icon(
                         imageVector = Icons.Outlined.PersonAddAlt,
                         contentDescription = "",
                         modifier = Modifier.size(35.dp)
                     )
-                    Text(text = "Tambah\nCustomer",textAlign = TextAlign.Center)
+                    Text(text = "Manage\nCustomer",textAlign = TextAlign.Center)
                 }
             }
             spacerV(height = 16.dp)
@@ -161,7 +162,7 @@ object Beranda : Screen {
                     .fillMaxWidth(0.9f)
                     .align(Alignment.CenterHorizontally)
                     .padding(horizontal = 16.dp),
-                backgroundColor = Color.Black,
+                backgroundColor = PrimaryColor.copy(alpha = 0.75f),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -176,10 +177,10 @@ object Beranda : Screen {
                             Text(text = "Rp9.100.000",fontWeight = FontWeight.W700)
                             spacerV(height = 8.dp)
                             Row (verticalAlignment = Alignment.CenterVertically){
-                                Icon(imageVector = Icons.Default.TrendingUp, contentDescription = "")
-                                Text(text = "63,52%",fontSize = 12.sp)
+                                Icon(imageVector = Icons.Default.TrendingUp, contentDescription = "",tint = Color.Green)
+                                Text(text = " 63,52%")
                             }
-                            Text(text = "vs bulan lalu",fontSize = 11.sp,color = Color.Gray)
+                            Text(text = "vs bulan lalu",fontSize = 11.sp)
                         }
                         spacerH(width = 16.dp)
                         Column(modifier = Modifier.weight(1f)){
@@ -188,10 +189,10 @@ object Beranda : Screen {
                             Text(text = "Rp9.100.000",fontWeight = FontWeight.W700)
                             spacerV(height = 8.dp)
                             Row (verticalAlignment = Alignment.CenterVertically){
-                                Icon(imageVector = Icons.Default.TrendingUp, contentDescription = "")
-                                Text(text = "63,52%",fontSize = 12.sp)
+                                Icon(imageVector = Icons.Default.TrendingDown, contentDescription = "",tint = Color.Red)
+                                Text(text = " 63,52%")
                             }
-                            Text(text = "vs bulan lalu",fontSize = 11.sp,color = Color.Gray)
+                            Text(text = "vs bulan lalu",fontSize = 11.sp)
                         }
                     }
                     spacerV(height = 16.dp)
@@ -228,13 +229,13 @@ object Beranda : Screen {
             spacerV(height = 16.dp)
             Row {
                 Card (modifier = Modifier.padding(horizontal = 16.dp)){
-                    Row (Modifier.padding(horizontal = 8.dp)){
+                    Row (Modifier.padding(horizontal = 8.dp,vertical = 4.dp)){
                         Text(text = "Januari ")
                         Icon(imageVector = Icons.Default.KeyboardArrowDown,contentDescription = "")
                     }
                 }
                 Card (modifier = Modifier.padding(horizontal = 16.dp)){
-                    Row (Modifier.padding(horizontal = 8.dp)){
+                    Row (Modifier.padding(horizontal = 8.dp,vertical = 4.dp)){
                         Text(text = "Barang ")
                         Icon(imageVector = Icons.Default.KeyboardArrowDown,contentDescription = "")
                     }

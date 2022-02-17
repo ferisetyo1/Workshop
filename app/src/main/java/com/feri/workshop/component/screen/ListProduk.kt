@@ -1,4 +1,4 @@
-package com.feri.workshop.screen
+package com.feri.workshop.component.screen
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
