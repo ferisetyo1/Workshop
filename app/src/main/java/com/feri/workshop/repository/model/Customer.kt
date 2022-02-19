@@ -8,7 +8,10 @@ data class Customer(
     val notelp: String? = null,
     val alamat: String? = null,
     val lastTransaksion: String? = null,
-    val mobil: List<Mobil>? = null
+    val mobil: List<Mobil>? = null,
+    val createdAt: Long? = Date().time,
+    val createdBy: String? = null,
+    val isdelete: Boolean?=false
 ) {
 
     data class Mobil(
@@ -22,6 +25,9 @@ data class Customer(
         val norangka: String? = null,
         val nomesin: String? = null,
         val keterangan: String? = null,
+        val createdAt: Long? = Date().time,
+        val createdBy: String? = null,
+        val isdelete: Boolean?=false
     )
 
     object TipeMobil {

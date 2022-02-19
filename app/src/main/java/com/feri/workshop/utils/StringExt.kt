@@ -2,6 +2,7 @@ package com.feri.workshop.utils
 
 import android.util.Patterns
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.capitalize
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,6 +39,10 @@ fun String?.toFormattedDate(
         ""
     }
 }
+
+fun String.capitalizeWords() = split(' ').joinToString(" ", transform = {
+    it.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+})
 
 fun String?.toDateorNull(
     inputPattern: String = "yyyy-MM-dd HH:mm:ss",

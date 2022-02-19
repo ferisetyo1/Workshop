@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun dividerSmallH(height: Dp) {
+fun dividerSmallH(height: Dp=1.dp) {
     Spacer(
         modifier = Modifier
             .height(height = height)

@@ -10,6 +10,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import com.feri.workshop.component.screen.*
+import com.feri.workshop.component.viewmodel.CustomerViewModel
 import com.feri.workshop.ui.helper.BottomNavigationBar
 import com.feri.workshop.ui.theme.WorkshopTheme
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -22,6 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     val mainViewModel by viewModels<MainViewModel>()
+    val customerViewModel by viewModels<CustomerViewModel>()
 
     @ExperimentalAnimationApi
     @ExperimentalComposeUiApi

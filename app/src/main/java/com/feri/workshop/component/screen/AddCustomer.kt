@@ -19,10 +19,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.feri.workshop.MainActivity
 import com.feri.workshop.component.viewmodel.CustomerViewModel
 import com.feri.workshop.repository.model.Customer
 import com.feri.workshop.ui.helper.screenLoading
@@ -31,6 +33,7 @@ import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.BackgroundColor
 import com.feri.workshop.ui.theme.PrimaryColor
 import com.feri.workshop.utils.showToast
+import java.util.*
 
 object AddCustomer : Screen {
     override val name = "AddCustomer"
@@ -39,7 +42,8 @@ object AddCustomer : Screen {
     @Composable
     override fun screen(navController: NavHostController) {
         val context = LocalContext.current
-        val customerVM: CustomerViewModel = hiltViewModel()
+        val activity = context as MainActivity
+        val customerVM = activity.customerViewModel
 
         var namapelanggan by remember { mutableStateOf("") }
         var errorNamaPelanggan by remember { mutableStateOf("") }
@@ -111,7 +115,7 @@ object AddCustomer : Screen {
                 OutlinedTextField(
                     value = namapelanggan,
                     onValueChange = {
-                        errorNamaPelanggan=""
+                        errorNamaPelanggan = ""
                         namapelanggan = it
                     },
                     modifier = Modifier
@@ -134,14 +138,17 @@ object AddCustomer : Screen {
                 OutlinedTextField(
                     value = nomortelfon,
                     onValueChange = {
-                        errorPhoneNumber=""
+                        errorPhoneNumber = ""
                         nomortelfon = it
                     },
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorPhoneNumber.isNotEmpty(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    )
                 )
                 if (errorPhoneNumber.isNotEmpty()) Text(
                     text = errorPhoneNumber,
@@ -157,7 +164,7 @@ object AddCustomer : Screen {
                 OutlinedTextField(
                     value = alamat,
                     onValueChange = {
-                        errorAlamat=""
+                        errorAlamat = ""
                         alamat = it
                     },
                     modifier = Modifier
@@ -180,7 +187,7 @@ object AddCustomer : Screen {
                 OutlinedTextField(
                     value = merk,
                     onValueChange = {
-                        errorMerk=""
+                        errorMerk = ""
                         merk = it
                     },
                     modifier = Modifier
@@ -203,7 +210,7 @@ object AddCustomer : Screen {
                 OutlinedTextField(
                     value = nomorpolisi,
                     onValueChange = {
-                        errorNomorPolisi=""
+                        errorNomorPolisi = ""
                         nomorpolisi = it
                     },
                     modifier = Modifier
@@ -258,7 +265,10 @@ object AddCustomer : Screen {
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    )
                 )
                 spacerV(height = 16.dp)
                 Text(text = "Silinder")
@@ -271,7 +281,10 @@ object AddCustomer : Screen {
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    )
                 )
                 spacerV(height = 16.dp)
                 Text(text = "Warna")
@@ -297,7 +310,10 @@ object AddCustomer : Screen {
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    )
                 )
                 spacerV(height = 16.dp)
                 Text(text = "No. Mesin")
@@ -310,7 +326,10 @@ object AddCustomer : Screen {
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    )
                 )
                 spacerV(height = 16.dp)
                 Text(text = "Keterangan")
@@ -323,37 +342,38 @@ object AddCustomer : Screen {
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    keyboardActions = KeyboardActions(onDone = {keyboard?.hide()}),
+                    keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                 )
                 spacerV(height = 16.dp)
                 Button(
                     onClick = {
-                        if (namapelanggan.isEmpty()){
-                            errorNamaPelanggan="Nama tidak boleh kosong."
+                        if (namapelanggan.isEmpty()) {
+                            errorNamaPelanggan = "Nama tidak boleh kosong."
                             return@Button
                         }
-                        if (nomortelfon.isEmpty()){
-                            errorPhoneNumber="No. Telfon tidak boleh kosong."
+                        if (nomortelfon.isEmpty()) {
+                            errorPhoneNumber = "No. Telfon tidak boleh kosong."
                             return@Button
                         }
-                        if (alamat.isEmpty()){
-                            errorAlamat="Alamat tidak boleh kosong."
+                        if (alamat.isEmpty()) {
+                            errorAlamat = "Alamat tidak boleh kosong."
                             return@Button
                         }
-                        if (merk.isEmpty()){
-                            errorMerk="Merk tidak boleh kosong."
+                        if (merk.isEmpty()) {
+                            errorMerk = "Merk tidak boleh kosong."
                             return@Button
                         }
-                        if (nomorpolisi.isEmpty()){
-                            errorNomorPolisi="No. Polisi tidak boleh kosong."
+                        if (nomorpolisi.isEmpty()) {
+                            errorNomorPolisi = "No. Polisi tidak boleh kosong."
                             return@Button
                         }
                         customerVM.addCustomer(
                             customer = Customer(
-                                nama = namapelanggan,
+                                nama = namapelanggan.lowercase(),
                                 notelp = nomortelfon,
                                 alamat = alamat,
+                                createdBy = "Feri",
                                 mobil = listOf(
                                     Customer.Mobil(
                                         merk = merk,
@@ -363,12 +383,16 @@ object AddCustomer : Screen {
                                         warna = warna,
                                         norangka = noRangka,
                                         nomesin = noMesin,
-                                        keterangan = keterangan
+                                        keterangan = keterangan,
+                                        createdBy = "Feri",
                                     )
                                 )
                             ),
                             isLoading = { isLoading = it },
-                            onSuccess = { navController.popBackStack() },
+                            onSuccess = {
+                                context.showToast("Berhasil menambahkan customer")
+                                navController.navigateUp()
+                            },
                             onFailed = { context.showToast(it) }
                         )
                     },
