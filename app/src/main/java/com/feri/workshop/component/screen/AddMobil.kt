@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.*
@@ -25,16 +24,14 @@ import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
 import com.feri.workshop.repository.model.Customer
 import com.feri.workshop.repository.model.Mobil
-import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.BackgroundColor
 import com.feri.workshop.ui.theme.PrimaryColor
 import com.feri.workshop.utils.showToast
-import java.util.*
 
-object AddCustomer : Screen {
-    override val name = "Tambah Pelanggan"
+object AddMobil : Screen {
+    override val name = "Tambah Mobil"
 
     @ExperimentalComposeUiApi
     @Composable
@@ -42,16 +39,7 @@ object AddCustomer : Screen {
         val context = LocalContext.current
         val activity = context as MainActivity
         val customerVM = activity.customerViewModel
-
-        var namapelanggan by remember { mutableStateOf("") }
-        var errorNamaPelanggan by remember { mutableStateOf("") }
-
-        var nomortelfon by remember { mutableStateOf("") }
-        var errorPhoneNumber by remember { mutableStateOf("") }
-
-        var alamat by remember { mutableStateOf("") }
-        var errorAlamat by remember { mutableStateOf("") }
-
+        val customer by remember { customerVM.selectedCustomer }
         var merk by remember { mutableStateOf("") }
         var errorMerk by remember { mutableStateOf("") }
 
@@ -75,6 +63,7 @@ object AddCustomer : Screen {
         var isLoading by remember { mutableStateOf(false) }
 
         val keyboard = LocalSoftwareKeyboardController.current
+
         Scaffold(topBar = {
             TopAppBar(
                 title = {
@@ -96,87 +85,12 @@ object AddCustomer : Screen {
                 elevation = 0.dp,
             )
         }) {
-            screenLoading(loading = isLoading)
             Column(
                 Modifier
+                    .fillMaxSize()
                     .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-//                Text(text = "Data Pelanggan", fontSize = 24.sp, fontWeight = FontWeight.W700)
-//                spacerV(height = 24.dp)
-                Row {
-                    Text(text = "Nama")
-                    Text(text = "*", color = Color.Red)
-                }
-                spacerV(height = 8.dp)
-                OutlinedTextField(
-                    value = namapelanggan,
-                    onValueChange = {
-                        errorNamaPelanggan = ""
-                        namapelanggan = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    isError = errorNamaPelanggan.isNotEmpty(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-                )
-                if (errorNamaPelanggan.isNotEmpty()) Text(
-                    text = errorNamaPelanggan,
-                    color = Color.Red,
-                    fontSize = 12.sp
-                )
-                spacerV(height = 16.dp)
-                Row {
-                    Text(text = "Nomor Telepon")
-                    Text(text = "*", color = Color.Red)
-                }
-                spacerV(height = 8.dp)
-                OutlinedTextField(
-                    value = nomortelfon,
-                    onValueChange = {
-                        errorPhoneNumber = ""
-                        nomortelfon = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    isError = errorPhoneNumber.isNotEmpty(),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Number
-                    )
-                )
-                if (errorPhoneNumber.isNotEmpty()) Text(
-                    text = errorPhoneNumber,
-                    color = Color.Red,
-                    fontSize = 12.sp
-                )
-                spacerV(height = 16.dp)
-                Row {
-                    Text(text = "Alamat")
-                    Text(text = "*", color = Color.Red)
-                }
-                spacerV(height = 8.dp)
-                OutlinedTextField(
-                    value = alamat,
-                    onValueChange = {
-                        errorAlamat = ""
-                        alamat = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    isError = errorAlamat.isNotEmpty(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-                )
-                if (errorAlamat.isNotEmpty()) Text(
-                    text = errorAlamat,
-                    color = Color.Red,
-                    fontSize = 12.sp
-                )
-                spacerV(height = 16.dp)
                 Row {
                     Text(text = "Merk")
                     Text(text = "*", color = Color.Red)
@@ -227,12 +141,12 @@ object AddCustomer : Screen {
                     Button(
                         onClick = { tipe = Mobil.TipeMobil.automatic },
                         modifier = Modifier.weight(1f),
-                        colors = if (tipe == Mobil.TipeMobil.automatic) buttonColors(
+                        colors = if (tipe == Mobil.TipeMobil.automatic) ButtonDefaults.buttonColors(
                             PrimaryColor.copy(
                                 alpha = 0.75f
                             )
                         )
-                        else buttonColors(BackgroundColor),
+                        else ButtonDefaults.buttonColors(BackgroundColor),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(text = "Automatic")
@@ -241,12 +155,12 @@ object AddCustomer : Screen {
                     Button(
                         onClick = { tipe = Mobil.TipeMobil.manual },
                         modifier = Modifier.weight(1f),
-                        colors = if (tipe == Mobil.TipeMobil.manual) buttonColors(
+                        colors = if (tipe == Mobil.TipeMobil.manual) ButtonDefaults.buttonColors(
                             PrimaryColor.copy(
                                 alpha = 0.75f
                             )
                         )
-                        else buttonColors(BackgroundColor),
+                        else ButtonDefaults.buttonColors(BackgroundColor),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(text = "Manual")
@@ -346,18 +260,6 @@ object AddCustomer : Screen {
                 spacerV(height = 16.dp)
                 Button(
                     onClick = {
-                        if (namapelanggan.isEmpty()) {
-                            errorNamaPelanggan = "Nama tidak boleh kosong."
-                            return@Button
-                        }
-                        if (nomortelfon.isEmpty()) {
-                            errorPhoneNumber = "No. Telfon tidak boleh kosong."
-                            return@Button
-                        }
-                        if (alamat.isEmpty()) {
-                            errorAlamat = "Alamat tidak boleh kosong."
-                            return@Button
-                        }
                         if (merk.isEmpty()) {
                             errorMerk = "Merk tidak boleh kosong."
                             return@Button
@@ -366,13 +268,7 @@ object AddCustomer : Screen {
                             errorNomorPolisi = "No. Polisi tidak boleh kosong."
                             return@Button
                         }
-                        customerVM.addCustomer(
-                            customer = Customer(
-                                nama = namapelanggan.lowercase(),
-                                notelp = nomortelfon,
-                                alamat = alamat,
-                                createdBy = "Feri",
-                            ),
+                        customerVM.addMobil(
                             mobil = Mobil(
                                 merk = merk,
                                 nopol = nomorpolisi, tipe = tipe,
@@ -399,7 +295,6 @@ object AddCustomer : Screen {
                 ) {
                     Text(text = "Simpan")
                 }
-                spacerV(height = 16.dp)
             }
         }
     }

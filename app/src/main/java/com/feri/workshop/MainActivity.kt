@@ -125,6 +125,10 @@ class MainActivity : ComponentActivity() {
                             showBottomBar = DetailCustomer.showBottomNav
                             DetailCustomer.screen(navController)
                         }
+                        composable(AddMobil.name) {
+                            showBottomBar = AddMobil.showBottomNav
+                            AddMobil.screen(navController)
+                        }
                     }.also {
                         LaunchedEffect(key1 = currentAccount) {
                             if (currentAccount == null) navController.navigate(Login.name) {

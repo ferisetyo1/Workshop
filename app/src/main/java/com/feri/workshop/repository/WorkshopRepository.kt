@@ -23,7 +23,6 @@ class WorkshopRepository @Inject constructor(
     val userCollection = firestore.collection("user")
     val produkCollection = firestore.collection("produk")
     val customerCollection = firestore.collection("customer")
-    val mobilCollection = firestore.collection("mobil")
 
     fun addCustomer(
         customer: Customer,
@@ -33,16 +32,19 @@ class WorkshopRepository @Inject constructor(
         isLoading: (Boolean) -> Unit = {}
     ) {
         isLoading(true)
+
         customerCollection.document(customer.id.orEmpty()).set(customer).addOnCompleteListener {
             if (it.isSuccessful) {
-                mobilCollection.document(mobil.id.orEmpty()).set(mobil.copy(customerid = customer.id)).addOnCompleteListener {
-                    isLoading(false)
-                    if (it.isSuccessful) {
-                        onSuccess()
-                    } else {
-                        onFailed(it.exception?.message.orEmpty())
+                customerCollection.document(customer.id.orEmpty()).collection("mobil")
+                    .document(mobil.id.orEmpty()).set(mobil.copy(customerid = customer.id))
+                    .addOnCompleteListener {
+                        isLoading(false)
+                        if (it.isSuccessful) {
+                            onSuccess()
+                        } else {
+                            onFailed(it.exception?.message.orEmpty())
+                        }
                     }
-                }
             } else {
                 isLoading(false)
                 onFailed(it.exception?.message.orEmpty())
@@ -102,15 +104,32 @@ class WorkshopRepository @Inject constructor(
         isLoading: (Boolean) -> Unit = {}
     ) {
         isLoading(true)
-        mobilCollection.whereEqualTo("customerid",customerId).get().addOnCompleteListener {
+        customerCollection.document(customerId).collection("mobil").get().addOnCompleteListener {
             isLoading(false)
-            it.result.documents.map { it }
             if (it.isSuccessful) {
                 onSuccess(it.result.documents.map { it.toMobil() })
             } else {
                 onFailed(it.exception?.message.orEmpty())
             }
         }
+    }
+
+    fun addMobil(
+        mobil: Mobil,
+        isLoading: (Boolean) -> Unit,
+        onSuccess: () -> Unit,
+        onFailed: (String) -> Unit
+    ) {
+        isLoading(true)
+        customerCollection.document(mobil.customerid.orEmpty()).collection("mobil")
+            .document(mobil.id.orEmpty()).set(mobil).addOnCompleteListener {
+                isLoading(false)
+                if (it.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailed(it.exception?.message.orEmpty())
+                }
+            }
     }
 
 }

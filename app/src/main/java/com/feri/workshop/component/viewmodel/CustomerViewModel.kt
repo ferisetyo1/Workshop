@@ -13,6 +13,7 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
     ViewModel() {
     val selectedCustomer = mutableStateOf<Customer?>(null)
     val customers = mutableStateOf<List<Customer>>(emptyList())
+    val mobils = mutableStateOf<List<Mobil>>(emptyList())
 
     fun addCustomer(
         customer: Customer,
@@ -45,15 +46,49 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
         customers.value = emptyList()
     }
 
-    fun getMobil(
-        customerid: String?,
-        onSuccess: (List<Mobil>) -> Unit,
-        onFailed: (String) -> Unit
-    ) {
+    fun getMobil(customerid: String?,isLoading: (Boolean) -> Unit={}) {
         repository.listMobil(
             customerId = customerid.orEmpty(),
-            onSuccess = onSuccess,
-            onFailed = onFailed
+            onSuccess = {
+                mobils.value = it
+            },
+            isLoading = isLoading
+        )
+    }
+
+    fun addMobil(
+        mobil: Mobil,
+        isLoading: (Boolean) -> Unit,
+        onSuccess: () -> Unit,
+        onFailed: (String) -> Unit
+    ) {
+        repository.addMobil(
+            mobil = mobil.copy(customerid = selectedCustomer.value?.id),
+            isLoading = isLoading,
+            onSuccess = {
+                getMobil(selectedCustomer.value?.id)
+                onSuccess()
+            },
+            onFailed=onFailed
+        )
+    }
+
+    fun updateCustomer(
+        customer: Customer,
+        isLoading: (Boolean) -> Unit,
+        onSuccess: () -> Unit,
+        onFailed: (String) -> Unit
+    ) {
+        repository.updateCustomer(
+            customer = customer,
+            onSuccess = {
+                selectedCustomer.value=customer
+                onSuccess()
+                reset()
+                listCustomer()
+            },
+            onFailed = onFailed,
+            isLoading = isLoading
         )
     }
 }

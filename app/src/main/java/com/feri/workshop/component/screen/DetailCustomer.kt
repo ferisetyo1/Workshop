@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
 import com.feri.workshop.repository.model.Mobil
 import com.feri.workshop.ui.helper.dividerSmallH
+import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.utils.capitalizeWords
@@ -41,13 +42,7 @@ object DetailCustomer : Screen {
         val activity = context as MainActivity
         val customerVM = activity.customerViewModel
         val customer by remember { customerVM.selectedCustomer }
-        var mobils by remember { mutableStateOf<List<Mobil>>(emptyList()) }
-        LaunchedEffect(key1 = customer) {
-            customerVM.getMobil(
-                customerid = customer?.id,
-                onSuccess = { mobils = it },
-                onFailed = { context.showToast(it) })
-        }
+        var mobils by remember { customerVM.mobils }
         var namapelanggan by remember { mutableStateOf(customer?.nama.orEmpty().capitalizeWords()) }
         var errorNamaPelanggan by remember { mutableStateOf("") }
 
@@ -56,6 +51,11 @@ object DetailCustomer : Screen {
 
         var alamat by remember { mutableStateOf(customer?.alamat.orEmpty()) }
         var errorAlamat by remember { mutableStateOf("") }
+        var fullLoading by remember { mutableStateOf(false) }
+        var mobilLoading by remember { mutableStateOf(false) }
+        LaunchedEffect(key1 = true) {
+            customerVM.getMobil(customerid = customer?.id, isLoading = { mobilLoading = it })
+        }
         Scaffold(topBar = {
             TopAppBar(
                 title = {
@@ -77,6 +77,7 @@ object DetailCustomer : Screen {
                 elevation = 0.dp,
             )
         }) {
+            screenLoading(loading = fullLoading)
             LazyColumn(Modifier.fillMaxSize()) {
                 item {
                     Column(
@@ -171,7 +172,20 @@ object DetailCustomer : Screen {
                         if (customer?.nama?.lowercase() != namapelanggan.lowercase() || customer?.alamat?.lowercase() != alamat.lowercase() || customer?.notelp?.lowercase() != nomortelfon.lowercase()) {
                             spacerV(height = 16.dp)
                             Button(
-                                onClick = { /*TODO*/ },
+                                onClick = {
+                                    customer?.copy(
+                                        nama = namapelanggan,
+                                        alamat = alamat,
+                                        notelp = nomortelfon
+                                    )?.let { it1 ->
+                                        customerVM.updateCustomer(
+                                            customer = it1,
+                                            isLoading = { fullLoading = it },
+                                            onSuccess = { context.showToast("Berhasil mengupdate data pelanggan.") },
+                                            onFailed = { context.showToast(it) }
+                                        )
+                                    }
+                                },
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             ) {
@@ -189,12 +203,20 @@ object DetailCustomer : Screen {
                     spacerV(height = 16.dp)
                 }
                 item {
+                    Column() {
+                        screenLoading(loading = mobilLoading)
+                    }
+                }
+                item {
                     Column(
                         Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         if (mobils.size < 5) {
-                            Button(onClick = { /*TODO*/ }, shape = RoundedCornerShape(8.dp)) {
+                            Button(
+                                onClick = { navController.navigate(AddMobil.name) },
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
                                 Text(text = "Tambah Mobil")
                             }
                         }
@@ -244,7 +266,10 @@ object DetailCustomer : Screen {
                     Text(text = "Mobil", fontSize = 12.sp)
                     spacerV(height = 8.dp)
                     Text(
-                        text = item.merk.orEmpty().lowercase().capitalizeWords()+" • "+ item.nopol.orEmpty().lowercase().capitalizeWords()+" • "+item.tahun.orEmpty().lowercase().capitalizeWords(),
+                        text = item.merk.orEmpty().lowercase()
+                            .capitalizeWords() + " • " + item.nopol.orEmpty().lowercase()
+                            .capitalizeWords() + " • " + item.tahun.orEmpty().lowercase()
+                            .capitalizeWords(),
                         fontSize = 16.sp, fontWeight = FontWeight.W600
                     )
                     spacerV(height = 12.dp)
