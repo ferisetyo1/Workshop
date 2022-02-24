@@ -1,5 +1,6 @@
 package com.feri.workshop.component.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
 import com.feri.workshop.component.viewmodel.CustomerViewModel
+import com.feri.workshop.repository.model.Customer
 import com.feri.workshop.ui.helper.dividerSmallH
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
@@ -80,98 +82,111 @@ object ListCustomer : Screen {
                 spacerV(height = 8.dp)
                 LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp)) {
                     item { spacerV(height = 16.dp) }
-                    items(customers) {
-                        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
-                            Column(
-                                Modifier
-                                    .padding(vertical = 12.dp)
-                                    .fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.WatchLater,
-                                        contentDescription = "",
-                                        tint = Color.Gray,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    spacerH(width = 4.dp)
-                                    Text(
-                                        text = Date(
-                                            it.createdAt ?: 0
-                                        ).toFormattedString("dd MMMM yyyy, HH:mm"),
-                                        fontSize = 12.sp,
-                                        color = Color.Gray
-                                    )
-                                }
-                                spacerV(height = 8.dp)
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.PersonOutline,
-                                        contentDescription = ""
-                                    )
-                                    spacerH(width = 8.dp)
-                                    Text(text = it.nama.orEmpty().capitalizeWords())
-                                }
-                                spacerV(height = 8.dp)
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Phone,
-                                        contentDescription = ""
-                                    )
-                                    spacerH(width = 8.dp)
-                                    Text(text = it.notelp.orEmpty())
-                                }
-                                spacerV(height = 8.dp)
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Map,
-                                        contentDescription = ""
-                                    )
-                                    spacerH(width = 8.dp)
-                                    Text(text = it.alamat.orEmpty())
-                                }
-                                spacerV(height = 8.dp)
-                                dividerSmallH()
-                                spacerV(height = 8.dp)
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = "Lihat Selengkapnya")
-                                    Icon(
-                                        imageVector = Icons.Outlined.KeyboardArrowRight,
-                                        contentDescription = ""
-                                    )
-                                }
-                            }
+                    items(customers) { customer ->
+                        itemCustomer(customer) {
+                            customerVM.selectedCustomer.value = customer
+                            navController.navigate(DetailCustomer.name)
                         }
                         spacerV(height = 8.dp)
                     }
                     item { spacerV(height = 8.dp) }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun itemCustomer(customer: Customer, onClickCard: () -> Unit) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onClickCard() },
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Column(
+                Modifier
+                    .padding(vertical = 12.dp)
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.WatchLater,
+                        contentDescription = "",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    spacerH(width = 4.dp)
+                    Text(
+                        text = Date(
+                            customer.createdAt ?: 0
+                        ).toFormattedString("dd MMMM yyyy, HH:mm"),
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+                spacerV(height = 8.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.PersonOutline,
+                        contentDescription = ""
+                    )
+                    spacerH(width = 8.dp)
+                    Text(text = customer.nama.orEmpty().capitalizeWords())
+                }
+                spacerV(height = 8.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Phone,
+                        contentDescription = ""
+                    )
+                    spacerH(width = 8.dp)
+                    Text(text = customer.notelp.orEmpty())
+                }
+                spacerV(height = 8.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Map,
+                        contentDescription = ""
+                    )
+                    spacerH(width = 8.dp)
+                    Text(text = customer.alamat.orEmpty())
+                }
+                spacerV(height = 8.dp)
+                dividerSmallH()
+                spacerV(height = 8.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Lihat Selengkapnya")
+                    Icon(
+                        imageVector = Icons.Outlined.KeyboardArrowRight,
+                        contentDescription = ""
+                    )
                 }
             }
         }

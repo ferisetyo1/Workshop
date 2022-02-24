@@ -121,6 +121,10 @@ class MainActivity : ComponentActivity() {
                             showBottomBar = ListFinancial.showBottomNav
                             ListFinancial.screen(navController)
                         }
+                        composable(DetailCustomer.name) {
+                            showBottomBar = DetailCustomer.showBottomNav
+                            DetailCustomer.screen(navController)
+                        }
                     }.also {
                         LaunchedEffect(key1 = currentAccount) {
                             if (currentAccount == null) navController.navigate(Login.name) {

@@ -17,16 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
-import com.feri.workshop.component.viewmodel.CustomerViewModel
 import com.feri.workshop.repository.model.Customer
+import com.feri.workshop.repository.model.Mobil
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
@@ -60,7 +58,7 @@ object AddCustomer : Screen {
         var nomorpolisi by remember { mutableStateOf("") }
         var errorNomorPolisi by remember { mutableStateOf("") }
 
-        var tipe by remember { mutableStateOf(Customer.TipeMobil.automatic) }
+        var tipe by remember { mutableStateOf(Mobil.TipeMobil.automatic) }
 
         var tahun by remember { mutableStateOf("") }
 
@@ -227,9 +225,9 @@ object AddCustomer : Screen {
                 spacerV(height = 16.dp)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Button(
-                        onClick = { tipe = Customer.TipeMobil.automatic },
+                        onClick = { tipe = Mobil.TipeMobil.automatic },
                         modifier = Modifier.weight(1f),
-                        colors = if (tipe == Customer.TipeMobil.automatic) buttonColors(
+                        colors = if (tipe == Mobil.TipeMobil.automatic) buttonColors(
                             PrimaryColor.copy(
                                 alpha = 0.75f
                             )
@@ -241,9 +239,9 @@ object AddCustomer : Screen {
                     }
                     spacerH(width = 16.dp)
                     Button(
-                        onClick = { tipe = Customer.TipeMobil.manual },
+                        onClick = { tipe = Mobil.TipeMobil.manual },
                         modifier = Modifier.weight(1f),
-                        colors = if (tipe == Customer.TipeMobil.manual) buttonColors(
+                        colors = if (tipe == Mobil.TipeMobil.manual) buttonColors(
                             PrimaryColor.copy(
                                 alpha = 0.75f
                             )
@@ -374,19 +372,17 @@ object AddCustomer : Screen {
                                 notelp = nomortelfon,
                                 alamat = alamat,
                                 createdBy = "Feri",
-                                mobil = listOf(
-                                    Customer.Mobil(
-                                        merk = merk,
-                                        nopol = nomorpolisi, tipe = tipe,
-                                        tahun = tahun,
-                                        silinder = silinder,
-                                        warna = warna,
-                                        norangka = noRangka,
-                                        nomesin = noMesin,
-                                        keterangan = keterangan,
-                                        createdBy = "Feri",
-                                    )
-                                )
+                            ),
+                            mobil = Mobil(
+                                merk = merk,
+                                nopol = nomorpolisi, tipe = tipe,
+                                tahun = tahun,
+                                silinder = silinder,
+                                warna = warna,
+                                norangka = noRangka,
+                                nomesin = noMesin,
+                                keterangan = keterangan,
+                                createdBy = "Feri",
                             ),
                             isLoading = { isLoading = it },
                             onSuccess = {
