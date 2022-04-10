@@ -1,138 +1,173 @@
 package com.feri.workshop
 
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.feri.workshop.component.screen.*
+import com.feri.workshop.component.sheet.BiayaLainnya
+import com.feri.workshop.component.sheet.MetodePembayaran
+import com.feri.workshop.component.sheet.RentangTanggal
+import com.feri.workshop.component.sheet.TambahStock
 import com.feri.workshop.component.viewmodel.CustomerViewModel
+import com.feri.workshop.component.viewmodel.ProdukViewModel
+import com.feri.workshop.component.viewmodel.RentangTanggalViewModel
+import com.feri.workshop.component.viewmodel.TransaksiViewModel
 import com.feri.workshop.ui.helper.BottomNavigationBar
 import com.feri.workshop.ui.theme.WorkshopTheme
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
+import com.google.accompanist.navigation.material.bottomSheet
+import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    val transaksiViewModel by viewModels<TransaksiViewModel>()
+    val rentangViewModel by viewModels<RentangTanggalViewModel>()
     val mainViewModel by viewModels<MainViewModel>()
     val customerViewModel by viewModels<CustomerViewModel>()
+    val produkViewModel by viewModels<ProdukViewModel>()
 
+    @ExperimentalMaterialNavigationApi
     @ExperimentalAnimationApi
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         setContent {
-            val navController = rememberAnimatedNavController()
+            val bottomSheetNavigator = rememberBottomSheetNavigator()
+            val navController = rememberAnimatedNavController(bottomSheetNavigator)
             var showBottomBar by remember { mutableStateOf(false) }
             val currentAccount by remember { mainViewModel.currentAccount }
             WorkshopTheme(darkTheme = true) {
-                Scaffold(bottomBar = {
-                    if (showBottomBar) BottomNavigationBar(
-                        navController = navController,
-                        items = listOf(Beranda, ManagementProduk, Reminder, Profile),
-                        onItemClick = {
-                            navController.navigate(it.name) {
-                                if (it.name != Beranda.name) {
-                                    popUpTo(it.name) { inclusive = true }
-                                    launchSingleTop = true
+                ModalBottomSheetLayout(
+                    bottomSheetNavigator = bottomSheetNavigator,
+                    scrimColor = Color.Black.copy(alpha = 0.8f),
+                    sheetShape = RoundedCornerShape(topEnd = 8.dp, topStart = 8.dp)
+                ) {
+                    Scaffold(bottomBar = {
+                        if (showBottomBar) BottomNavigationBar(
+                            navController = navController,
+                            items = listOf(Beranda, ManagementProduk, Reminder, Profile),
+                            onItemClick = {
+                                navController.navigate(it.routeName) {
+                                    if (it.routeName != Beranda.routeName) {
+                                        popUpTo(it.routeName) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
                                 }
                             }
-                        }
-                    )
-                }) {
-                    AnimatedNavHost(
-                        navController = navController,
-                        startDestination = Splash.name
-                    ) {
-                        composable(Beranda.name) {
-                            showBottomBar = Beranda.showBottomNav
-                            Beranda.screen(navController)
-                        }
-                        composable(Profile.name) {
-                            showBottomBar = Profile.showBottomNav
-                            Profile.screen(navController)
-                        }
-                        composable(Reminder.name) {
-                            showBottomBar = Reminder.showBottomNav
-                            Reminder.screen(navController)
-                        }
-                        composable(ManagementProduk.name) {
-                            showBottomBar = ManagementProduk.showBottomNav
-                            ManagementProduk.screen(navController)
-                        }
-                        composable(Splash.name) {
-                            showBottomBar = Splash.showBottomNav
-                            Splash.screen(navController)
-                        }
-                        composable(ListProduk.name) {
-                            showBottomBar = ListProduk.showBottomNav
-                            ListProduk.screen(navController)
-                        }
-                        composable(DetailProduk.name) {
-                            showBottomBar = DetailProduk.showBottomNav
-                            DetailProduk.screen(navController)
-                        }
-                        composable(AddCustomer.name) {
-                            showBottomBar = AddCustomer.showBottomNav
-                            AddCustomer.screen(navController)
-                        }
-                        composable(SuccessAddCustomer.name) {
-                            showBottomBar = SuccessAddCustomer.showBottomNav
-                            SuccessAddCustomer.screen(navController)
-                        }
-                        composable(FindCustomer.name) {
-                            showBottomBar = FindCustomer.showBottomNav
-                            FindCustomer.screen(navController)
-                        }
-                        composable(ListCustomer.name) {
-                            showBottomBar = ListCustomer.showBottomNav
-                            ListCustomer.screen(navController)
-                        }
-                        composable(AntrianService.name) {
-                            showBottomBar = AntrianService.showBottomNav
-                            AntrianService.screen(navController)
-                        }
-                        composable(Checkout.name) {
-                            showBottomBar = Checkout.showBottomNav
-                            Checkout.screen(navController)
-                        }
-                        composable(Login.name) {
-                            showBottomBar = Login.showBottomNav
-                            Login.screen(navController)
-                        }
-                        composable(InfoTransaksi.name) {
-                            showBottomBar = InfoTransaksi.showBottomNav
-                            InfoTransaksi.screen(navController)
-                        }
-                        composable(RingkasanTransaksi.name) {
-                            showBottomBar = RingkasanTransaksi.showBottomNav
-                            RingkasanTransaksi.screen(navController)
-                        }
-                        composable(ListFinancial.name) {
-                            showBottomBar = ListFinancial.showBottomNav
-                            ListFinancial.screen(navController)
-                        }
-                        composable(DetailCustomer.name) {
-                            showBottomBar = DetailCustomer.showBottomNav
-                            DetailCustomer.screen(navController)
-                        }
-                        composable(AddMobil.name) {
-                            showBottomBar = AddMobil.showBottomNav
-                            AddMobil.screen(navController)
-                        }
-                    }.also {
-                        LaunchedEffect(key1 = currentAccount) {
-                            if (currentAccount == null) navController.navigate(Login.name) {
-                                navController.backQueue.clear()
+                        )
+                    }) {
+                        AnimatedNavHost(
+                            navController = navController,
+                            startDestination = Splash.routeName,
+                        ) {
+                            listOf(
+                                AddCustomer,
+                                AddMobil,
+                                AntrianService,
+                                Beranda,
+                                Checkout,
+                                DetailCustomer,
+                                DetailProduk,
+                                FindCustomer,
+                                InfoTransaksi,
+                                ListCustomer,
+                                ListFinancial,
+                                ListProduk,
+                                Login,
+                                ManagementProduk,
+                                Profile,
+                                Reminder,
+                                RingkasanTransaksi,
+                                Splash,
+                                SuccessAddCustomer,
+                                DetailMobil,
+                                AddProduk,
+                                AddKategoriProduk,
+                                DetailProduk
+                            ).forEach { screen ->
+                                composable(screen.routeName,
+                                    enterTransition = {
+                                        if (!screen.showBottomNav) {
+                                            slideInHorizontally(
+                                                initialOffsetX = { it },
+                                                animationSpec = tween(
+                                                    durationMillis = 200,
+                                                    easing = LinearOutSlowInEasing
+                                                )
+                                            )
+                                        } else fadeIn()
+                                    },
+                                    exitTransition = {
+                                        if (!screen.showBottomNav) {
+                                            slideOutHorizontally(
+                                                targetOffsetX = { -it },
+                                                animationSpec = tween(
+                                                    durationMillis = 200,
+                                                    easing = LinearOutSlowInEasing
+                                                )
+                                            )
+                                        } else fadeOut()
+                                    },
+                                    popEnterTransition = {
+                                        if (!screen.showBottomNav) {
+                                            slideInHorizontally(
+                                                initialOffsetX = { -it },
+                                                animationSpec = tween(
+                                                    durationMillis = 200,
+                                                    easing = LinearOutSlowInEasing
+                                                )
+                                            )
+                                        } else fadeIn()
+                                    },
+                                    popExitTransition = {
+                                        if (!screen.showBottomNav) {
+                                            slideOutHorizontally(
+                                                targetOffsetX = { it },
+                                                animationSpec = tween(
+                                                    durationMillis = 200,
+                                                    easing = LinearOutSlowInEasing
+                                                )
+                                            )
+                                        } else fadeOut()
+                                    }) {
+                                    showBottomBar = screen.showBottomNav
+                                    screen.screen(navController)
+                                }
+                                listOf(
+                                    TambahStock,
+                                    MetodePembayaran,
+                                    BiayaLainnya,
+                                    RentangTanggal
+                                ).forEach { sheet ->
+                                    bottomSheet(sheet.routeName) {
+                                        sheet.screen(
+                                            navController = navController
+                                        )
+                                    }
+                                }
+                            }
+                        }.also {
+                            LaunchedEffect(key1 = currentAccount) {
+                                if (currentAccount == null) navController.navigate(Login.routeName) {
+                                    navController.backQueue.clear()
+                                }
                             }
                         }
                     }

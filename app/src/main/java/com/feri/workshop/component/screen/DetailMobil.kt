@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,14 +24,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
 import com.feri.workshop.data.model.Mobil
+import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.BackgroundColor
 import com.feri.workshop.ui.theme.PrimaryColor
 import com.feri.workshop.utils.showToast
 
-object AddMobil : Screen {
-    override val routeName = "Tambah Mobil"
+object DetailMobil : Screen {
+    override val routeName = "detailmobil"
+    override val pageTitle = "Mobil"
 
     @ExperimentalComposeUiApi
     @Composable
@@ -38,26 +41,27 @@ object AddMobil : Screen {
         val context = LocalContext.current
         val activity = context as MainActivity
         val customerVM = activity.customerViewModel
-        val customer by remember { customerVM.selectedCustomer }
-        var merk by remember { mutableStateOf("") }
+        val createTransaksiViewModel = activity.transaksiViewModel
+        val mobil by remember { customerVM.selectedMobil }
+        var merk by remember { mutableStateOf(mobil?.merk.orEmpty()) }
         var errorMerk by remember { mutableStateOf("") }
 
-        var nomorpolisi by remember { mutableStateOf("") }
+        var nomorpolisi by remember { mutableStateOf(mobil?.nopol.orEmpty()) }
         var errorNomorPolisi by remember { mutableStateOf("") }
 
-        var tipe by remember { mutableStateOf(Mobil.TipeMobil.automatic) }
+        var tipe by remember { mutableStateOf(mobil?.tipe.orEmpty()) }
 
-        var tahun by remember { mutableStateOf("") }
+        var tahun by remember { mutableStateOf(mobil?.tahun.orEmpty()) }
 
-        var silinder by remember { mutableStateOf("") }
+        var silinder by remember { mutableStateOf(mobil?.silinder.orEmpty()) }
 
-        var warna by remember { mutableStateOf("") }
+        var warna by remember { mutableStateOf(mobil?.warna.orEmpty()) }
 
-        var noRangka by remember { mutableStateOf("") }
+        var noRangka by remember { mutableStateOf(mobil?.norangka.orEmpty()) }
 
-        var noMesin by remember { mutableStateOf("") }
+        var noMesin by remember { mutableStateOf(mobil?.nomesin.orEmpty()) }
 
-        var keterangan by remember { mutableStateOf("") }
+        var keterangan by remember { mutableStateOf(mobil?.keterangan.orEmpty()) }
 
         var isLoading by remember { mutableStateOf(false) }
 
@@ -66,7 +70,7 @@ object AddMobil : Screen {
         Scaffold(topBar = {
             TopAppBar(
                 title = {
-                    Text(text = routeName)
+                    Text(text = pageTitle)
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
@@ -78,12 +82,28 @@ object AddMobil : Screen {
                     }
                 },
                 actions = {
+                    IconButton(onClick = {
+                        customerVM.deleteMobil(
+                            onSuccess = {
+                                navController.navigateUp()
+                                context.showToast("Berhasil menghapus mobil")
+                            },
+                            onFailed = { context.showToast(it) },
+                            isLoading = { isLoading = it })
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                    }
                 },
                 backgroundColor = Color.Transparent,
                 contentColor = Color.Transparent,
                 elevation = 0.dp,
             )
         }) {
+            screenLoading(loading = isLoading)
             Column(
                 Modifier
                     .fillMaxSize()
@@ -257,7 +277,7 @@ object AddMobil : Screen {
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                 )
                 spacerV(height = 16.dp)
-                Button(
+                if (merk != mobil?.merk || nomorpolisi != mobil?.nopol || tahun != mobil?.tahun || silinder != mobil?.silinder || warna != mobil?.warna || noRangka != mobil?.norangka || noMesin != mobil?.nomesin || keterangan != mobil?.keterangan) Button(
                     onClick = {
                         if (merk.isEmpty()) {
                             errorMerk = "Merk tidak boleh kosong."
@@ -269,6 +289,8 @@ object AddMobil : Screen {
                         }
                         customerVM.addMobil(
                             mobil = Mobil(
+                                id = mobil?.id,
+                                customerid = mobil?.customerid,
                                 merk = merk,
                                 nopol = nomorpolisi, tipe = tipe,
                                 tahun = tahun,
@@ -277,7 +299,8 @@ object AddMobil : Screen {
                                 norangka = noRangka,
                                 nomesin = noMesin,
                                 keterangan = keterangan,
-                                createdBy = "Feri",
+                                createdBy = mobil?.createdBy,
+                                createdAt = mobil?.createdAt,
                             ),
                             isLoading = { isLoading = it },
                             onSuccess = {
@@ -294,6 +317,24 @@ object AddMobil : Screen {
                 ) {
                     Text(text = "Simpan")
                 }
+                spacerV(height = 16.dp)
+                Button(
+                    onClick = {
+                        createTransaksiViewModel.reset()
+                        createTransaksiViewModel.setCustomerdanMobil(
+                            customerVM.selectedCustomer.value,
+                            customerVM.selectedMobil.value
+                        )
+                        navController.navigate(ListProduk.routeName)
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    Text(text = "Service Sekarang")
+                }
+                spacerV(height = 16.dp)
             }
         }
     }

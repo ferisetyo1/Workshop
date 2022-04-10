@@ -1,7 +1,9 @@
-package com.feri.workshop.repository.model
+package com.feri.workshop.data.model
 
+import com.google.firebase.firestore.IgnoreExtraProperties
 import java.util.*
 
+@IgnoreExtraProperties
 data class Mobil(
     val id: String? = UUID.randomUUID().toString(),
     val customerid: String? = null,
@@ -16,7 +18,8 @@ data class Mobil(
     val keterangan: String? = null,
     val createdAt: Long? = Date().time,
     val createdBy: String? = null,
-    val isdelete: Boolean? = false
+    val isdelete: Boolean? = false,
+    val lastTransaksion: Long? = null,
 ) {
     object TipeMobil {
         const val automatic = "automatic"

@@ -2,9 +2,9 @@ package com.feri.workshop.component.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.feri.workshop.repository.WorkshopRepository
-import com.feri.workshop.repository.model.Customer
-import com.feri.workshop.repository.model.Mobil
+import com.feri.workshop.data.WorkshopRepository
+import com.feri.workshop.data.model.Customer
+import com.feri.workshop.data.model.Mobil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -12,8 +12,14 @@ import javax.inject.Inject
 class CustomerViewModel @Inject constructor(private val repository: WorkshopRepository) :
     ViewModel() {
     val selectedCustomer = mutableStateOf<Customer?>(null)
+    val selectedMobil = mutableStateOf<Mobil?>(null)
     val customers = mutableStateOf<List<Customer>>(emptyList())
     val mobils = mutableStateOf<List<Mobil>>(emptyList())
+    val isLoadingList = mutableStateOf(false)
+
+    init {
+        listCustomer(refresh = true)
+    }
 
     fun addCustomer(
         customer: Customer,
@@ -35,10 +41,10 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
         )
     }
 
-    fun listCustomer(query: String = "") {
-        repository.listCustomer(query, onSuccess = {
+    fun listCustomer(query: String = "",refresh:Boolean=false) {
+        repository.listCustomer(query = query,refresh = refresh, onSuccess = {
             customers.value = it
-        })
+        }, isLoading = { isLoadingList.value = it })
     }
 
 
@@ -46,7 +52,7 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
         customers.value = emptyList()
     }
 
-    fun getMobil(customerid: String?,isLoading: (Boolean) -> Unit={}) {
+    fun getMobil(customerid: String?, isLoading: (Boolean) -> Unit = {}) {
         repository.listMobil(
             customerId = customerid.orEmpty(),
             onSuccess = {
@@ -69,7 +75,7 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
                 getMobil(selectedCustomer.value?.id)
                 onSuccess()
             },
-            onFailed=onFailed
+            onFailed = onFailed
         )
     }
 
@@ -82,7 +88,7 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
         repository.updateCustomer(
             customer = customer,
             onSuccess = {
-                selectedCustomer.value=customer
+                selectedCustomer.value = customer
                 onSuccess()
                 reset()
                 listCustomer()
@@ -91,4 +97,42 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
             isLoading = isLoading
         )
     }
+
+    fun deleteCustomer(
+        onSuccess: () -> Unit,
+        onFailed: (String) -> Unit,
+        isLoading: (Boolean) -> Unit
+    ) {
+        selectedCustomer.value?.let {
+            repository.deleteCustomer(
+                customer = it,
+                onSuccess = {
+                    onSuccess()
+                    reset()
+                    listCustomer()
+                },
+                onFailed = onFailed,
+                isLoading = isLoading
+            )
+        }
+    }
+
+    fun deleteMobil(
+        onSuccess: () -> Unit,
+        onFailed: (String) -> Unit,
+        isLoading: (Boolean) -> Unit
+    ) {
+        selectedMobil.value?.let {
+            repository.deleteMobil(
+                mobil = it,
+                onSuccess = {
+                    getMobil(selectedCustomer.value?.id)
+                    onSuccess()
+                },
+                onFailed = onFailed,
+                isLoading = isLoading
+            )
+        }
+    }
+
 }

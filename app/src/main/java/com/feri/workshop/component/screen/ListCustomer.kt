@@ -16,15 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
-import com.feri.workshop.component.viewmodel.CustomerViewModel
-import com.feri.workshop.repository.model.Customer
+import com.feri.workshop.data.model.Customer
 import com.feri.workshop.ui.helper.dividerSmallH
+import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.utils.capitalizeWords
@@ -32,18 +30,15 @@ import com.feri.workshop.utils.toFormattedString
 import java.util.*
 
 object ListCustomer : Screen {
-    override val name = "ListCustomer"
+    override val routeName = "ListCustomer"
 
     @Composable
     override fun screen(navController: NavHostController) {
         val activity = LocalContext.current as MainActivity
         val customerVM = activity.customerViewModel
-        LaunchedEffect(key1 = true) {
-            customerVM.reset()
-            customerVM.listCustomer()
-        }
         val customers by remember { customerVM.customers }
         var search by remember { mutableStateOf("") }
+        val isLoading by remember { customerVM.isLoadingList }
         Box(Modifier.fillMaxSize()) {
             Column(Modifier.fillMaxSize()) {
                 spacerV(height = 16.dp)
@@ -52,6 +47,7 @@ object ListCustomer : Screen {
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    spacerH(width = 8.dp)
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowLeft,
@@ -59,6 +55,7 @@ object ListCustomer : Screen {
                             tint = Color.White
                         )
                     }
+                    spacerH(width = 4.dp)
                     OutlinedTextField(
                         value = search,
                         onValueChange = {
@@ -69,23 +66,25 @@ object ListCustomer : Screen {
                         placeholder = { Text(text = "Cari Customer", color = Color.Gray) },
                         modifier = Modifier
                             .weight(1f),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(16.dp),
                         trailingIcon = {
                             Icon(imageVector = Icons.Default.Search, contentDescription = "")
                         }
                     )
-                    IconButton(onClick = { navController.navigate(AddCustomer.name) }) {
+                    spacerH(width = 4.dp)
+                    IconButton(onClick = { navController.navigate(AddCustomer.routeName) }) {
                         Icon(imageVector = Icons.Default.AddCircleOutline, contentDescription = "")
                     }
                     spacerH(width = 8.dp)
                 }
                 spacerV(height = 8.dp)
+                screenLoading(loading = isLoading)
                 LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp)) {
                     item { spacerV(height = 16.dp) }
                     items(customers) { customer ->
                         itemCustomer(customer) {
                             customerVM.selectedCustomer.value = customer
-                            navController.navigate(DetailCustomer.name)
+                            navController.navigate(DetailCustomer.routeName)
                         }
                         spacerV(height = 8.dp)
                     }

@@ -34,7 +34,7 @@ import com.feri.workshop.utils.isValidEmail
 import com.feri.workshop.utils.showToast
 
 object Login : Screen {
-    override val name = "Login"
+    override val routeName = "Login"
 
     @ExperimentalComposeUiApi
     @ExperimentalAnimationApi
@@ -140,8 +140,8 @@ object Login : Screen {
                         email = email,
                         password = password,
                         onSuccess = {
-                            navController.navigate(Beranda.name) {
-                                popUpTo(name) { inclusive = true }
+                            navController.navigate(Beranda.routeName) {
+                                popUpTo(routeName) { inclusive = true }
                                 launchSingleTop = true
                             }
                         }, onError = {

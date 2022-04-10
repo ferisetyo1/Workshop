@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import com.feri.workshop.R
 
 object Reminder : Screen {
-    override val name = "Reminder"
+    override val routeName = "Reminder"
     override val icon= R.drawable.ic_reminder
     override val showBottomNav = true
 

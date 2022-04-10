@@ -31,7 +31,7 @@ fun BottomNavigationBar(
         elevation = 5.dp
     ) {
         items.forEach { item ->
-            val selected = item.name == backStackEntry.value?.destination?.route
+            val selected = item.routeName == backStackEntry.value?.destination?.route
             BottomNavigationItem(
                 selected = selected,
                 onClick = { onItemClick(item) },
@@ -41,7 +41,7 @@ fun BottomNavigationBar(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             painterResource(id = item.icon),
-                            contentDescription = item.name
+                            contentDescription = item.routeName
                         )
                     }
                 })

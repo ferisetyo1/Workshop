@@ -1,18 +1,16 @@
-package com.feri.workshop.component.screen
+package com.feri.workshop.component.sheet
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.feri.workshop.MainActivity
 
-interface Screen {
+interface Sheets {
     val routeName: String
     val pageTitle: String
         get() = ""
-    val icon: Int
-        get() = -1
-    val showBottomNav: Boolean
-        get() = false
 
     @Composable
     fun screen(navController: NavHostController)
@@ -22,4 +20,5 @@ interface Screen {
         val context= LocalContext.current
         return context as MainActivity
     }
+
 }

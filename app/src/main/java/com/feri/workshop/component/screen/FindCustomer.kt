@@ -15,27 +15,31 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.PrimaryColor
 
 object FindCustomer : Screen {
-    override val name = "FindCustomer"
+    override val routeName = "FindCustomer"
 
     @ExperimentalComposeUiApi
     @Composable
     override fun screen(navController: NavHostController) {
+        val createTransaksiViewModel = getMainActivity().transaksiViewModel
         var nomortelfon by remember { mutableStateOf("") }
         var nomorpolisi by remember { mutableStateOf("") }
         var errorText by remember { mutableStateOf("") }
+        var isLoading by remember { mutableStateOf(false) }
         val keyboard = LocalSoftwareKeyboardController.current
         Scaffold(topBar = {
             TopAppBar(
                 title = {
+                    Text(text = "Data Pelanggan")
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
@@ -56,11 +60,9 @@ object FindCustomer : Screen {
             Column(
                 Modifier
                     .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
+                    .fillMaxSize(),
+                Arrangement.Center
             ) {
-                Text(text = "Data Pelanggan", fontSize = 24.sp, fontWeight = FontWeight.W700)
-                if (errorText.isNotEmpty()) Text(text = errorText, fontSize = 12.sp)
-                spacerV(height = 64.dp)
                 Card(
                     shape = CircleShape,
                     backgroundColor = PrimaryColor,
@@ -76,7 +78,9 @@ object FindCustomer : Screen {
                         )
                     }
                 }
-                spacerV(height = 24.dp)
+                spacerV(height = 16.dp)
+                if (errorText.isNotEmpty()) Text(text = errorText, fontSize = 12.sp)
+                spacerV(height = 16.dp)
                 Text(text = "Nomor Telepon")
                 spacerV(height = 8.dp)
                 OutlinedTextField(
@@ -89,7 +93,10 @@ object FindCustomer : Screen {
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorText.isNotEmpty(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    )
                 )
                 spacerV(height = 16.dp)
                 Text(text = "Nomor Polisi")
@@ -109,12 +116,22 @@ object FindCustomer : Screen {
                 )
                 spacerV(height = 32.dp)
                 Button(
-                    onClick = { /*TODO*/ }, shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth(0.5f).align(Alignment.CenterHorizontally)
+                    onClick = {
+                        createTransaksiViewModel.searchCustomer(
+                            notelp = nomortelfon,
+                            nopol = nomorpolisi,
+                            isLoading = {isLoading=true},
+                            onSuccess = {navController.navigate(ListProduk.routeName)},
+                            onFailed = {errorText=it})
+                    }, shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .align(Alignment.CenterHorizontally)
                 ) {
                     Text(text = "Lanjutkan")
                 }
             }
+            screenLoading(loading = isLoading)
         }
     }
 }

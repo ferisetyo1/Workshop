@@ -12,14 +12,14 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
 
 object Splash : Screen {
-    override val name = "Splash"
+    override val routeName = "Splash"
 
     @ExperimentalAnimationApi
     @Composable
     override fun screen(navController: NavHostController) {
         LaunchedEffect(key1 = true) {
             delay(3000)
-            navController.navigate(Beranda.name)
+            navController.navigate(Beranda.routeName)
         }
 
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {

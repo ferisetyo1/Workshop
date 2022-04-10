@@ -1,6 +1,7 @@
 package com.feri.workshop.ui.helper
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
@@ -15,8 +16,9 @@ fun screenLoading(loading: Boolean) {
     if (loading) Box(
         modifier = Modifier
             .fillMaxSize()
+            .clickable {  }
             .defaultMinSize(300.dp, 200.dp)
-            .background(color = Color.Black.copy(alpha = 0.5f))
+            .background(color = Color.Black.copy(alpha = 0.3f))
     ) {
         Column(
             modifier = Modifier.align(Alignment.Center),

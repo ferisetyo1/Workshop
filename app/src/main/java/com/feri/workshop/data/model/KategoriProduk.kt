@@ -1,13 +1,12 @@
-package com.feri.workshop.repository.model
+package com.feri.workshop.data.model
 
+import com.google.firebase.firestore.IgnoreExtraProperties
 import java.util.*
 
-data class Customer(
+@IgnoreExtraProperties
+data class KategoriProduk(
     val id: String? = UUID.randomUUID().toString(),
     val nama: String? = null,
-    val notelp: String? = null,
-    val alamat: String? = null,
-    val lastTransaksion: String? = null,
     val createdAt: Long? = Date().time,
     val createdBy: String? = null,
     val isdelete: Boolean?=false

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 
 object SuccessAddCustomer : Screen {
-    override val name = "SuccessAddCustomer"
+    override val routeName = "SuccessAddCustomer"
 
     @Composable
     override fun screen(navController: NavHostController) {

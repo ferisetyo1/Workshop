@@ -1,7 +1,7 @@
 package com.feri.workshop.di
 
 import android.content.Context
-import com.feri.workshop.repository.WorkshopRepository
+import com.feri.workshop.data.WorkshopRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

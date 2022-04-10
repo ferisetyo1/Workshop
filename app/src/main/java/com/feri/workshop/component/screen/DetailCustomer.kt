@@ -1,5 +1,6 @@
 package com.feri.workshop.component.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -7,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.WatchLater
@@ -23,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
-import com.feri.workshop.repository.model.Mobil
+import com.feri.workshop.data.model.Mobil
 import com.feri.workshop.ui.helper.dividerSmallH
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
@@ -34,7 +36,8 @@ import com.feri.workshop.utils.toFormattedString
 import java.util.*
 
 object DetailCustomer : Screen {
-    override val name = "Detail Customer"
+    override val routeName = "detailcustomer"
+    override val pageTitle = "Detail Customer"
 
     @Composable
     override fun screen(navController: NavHostController) {
@@ -59,7 +62,7 @@ object DetailCustomer : Screen {
         Scaffold(topBar = {
             TopAppBar(
                 title = {
-                    Text(text = name)
+                    Text(text = pageTitle)
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
@@ -71,6 +74,21 @@ object DetailCustomer : Screen {
                     }
                 },
                 actions = {
+                    IconButton(onClick = {
+                        customerVM.deleteCustomer(
+                            onSuccess = {
+                                navController.navigateUp()
+                                context.showToast("Berhasil menghapus pelanggan")
+                            },
+                            onFailed = { context.showToast(it) },
+                            isLoading = { fullLoading = it })
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                    }
                 },
                 backgroundColor = Color.Transparent,
                 contentColor = Color.Transparent,
@@ -199,7 +217,10 @@ object DetailCustomer : Screen {
                 }
 
                 itemsIndexed(mobils) { _, item ->
-                    itemMobil(item)
+                    itemMobil(item) {
+                        customerVM.selectedMobil.value = item
+                        navController.navigate(DetailMobil.routeName)
+                    }
                     spacerV(height = 16.dp)
                 }
                 item {
@@ -209,12 +230,12 @@ object DetailCustomer : Screen {
                 }
                 item {
                     Column(
-                        Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         if (mobils.size < 5) {
                             Button(
-                                onClick = { navController.navigate(AddMobil.name) },
+                                onClick = { navController.navigate(AddMobil.routeName) },
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(text = "Tambah Mobil")
@@ -228,10 +249,11 @@ object DetailCustomer : Screen {
     }
 
     @Composable
-    fun itemMobil(item: Mobil) {
+    fun itemMobil(item: Mobil, onClick: () -> Unit = {}) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onClick() }
                 .padding(horizontal = 16.dp),
             shape = RoundedCornerShape(8.dp)
         ) {
@@ -279,6 +301,15 @@ object DetailCustomer : Screen {
                         text = item.warna.orEmpty().lowercase().capitalizeWords(),
                         fontSize = 16.sp, fontWeight = FontWeight.W600
                     )
+                    item.lastTransaksion?.let {
+                        spacerV(height = 12.dp)
+                        Text(text = "Terakhir Service", fontSize = 12.sp)
+                        spacerV(height = 8.dp)
+                        Text(
+                            text = Date(it).toFormattedString("dd MMM yyyy, HH:mm"),
+                            fontSize = 16.sp, fontWeight = FontWeight.W600
+                        )
+                    }
                 }
                 spacerV(height = 12.dp)
                 dividerSmallH()

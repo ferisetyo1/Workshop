@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
-import com.feri.workshop.repository.model.Customer
-import com.feri.workshop.repository.model.Mobil
+import com.feri.workshop.data.model.Customer
+import com.feri.workshop.data.model.Mobil
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
@@ -34,7 +34,7 @@ import com.feri.workshop.utils.showToast
 import java.util.*
 
 object AddCustomer : Screen {
-    override val name = "Tambah Pelanggan"
+    override val routeName = "Tambah Pelanggan"
 
     @ExperimentalComposeUiApi
     @Composable
@@ -78,7 +78,7 @@ object AddCustomer : Screen {
         Scaffold(topBar = {
             TopAppBar(
                 title = {
-                    Text(text = name)
+                    Text(text = routeName)
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
