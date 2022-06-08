@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.PrimaryColor
@@ -89,7 +90,7 @@ object FindCustomer : Screen {
                         errorText = ""
                         nomortelfon = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorText.isNotEmpty(),
@@ -107,7 +108,7 @@ object FindCustomer : Screen {
                         errorText = ""
                         nomorpolisi = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorText.isNotEmpty(),

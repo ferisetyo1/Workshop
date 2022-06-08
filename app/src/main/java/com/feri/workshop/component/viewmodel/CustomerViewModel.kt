@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import com.feri.workshop.data.WorkshopRepository
 import com.feri.workshop.data.model.Customer
 import com.feri.workshop.data.model.Mobil
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -29,7 +31,7 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
         isLoading: (Boolean) -> Unit = {}
     ) {
         repository.addCustomer(
-            customer = customer,
+            customer = customer.copy(createdBy = Firebase.auth.currentUser?.email),
             mobil = mobil,
             onSuccess = {
                 onSuccess()
@@ -69,7 +71,7 @@ class CustomerViewModel @Inject constructor(private val repository: WorkshopRepo
         onFailed: (String) -> Unit
     ) {
         repository.addMobil(
-            mobil = mobil.copy(customerid = selectedCustomer.value?.id),
+            mobil = mobil.copy(customerid = selectedCustomer.value?.id,createdBy = Firebase.auth.currentUser?.email),
             isLoading = isLoading,
             onSuccess = {
                 getMobil(selectedCustomer.value?.id)

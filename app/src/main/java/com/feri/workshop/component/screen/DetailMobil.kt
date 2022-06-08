@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -24,12 +25,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
 import com.feri.workshop.data.model.Mobil
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.BackgroundColor
 import com.feri.workshop.ui.theme.PrimaryColor
 import com.feri.workshop.utils.showToast
+import java.util.regex.Pattern
 
 object DetailMobil : Screen {
     override val routeName = "detailmobil"
@@ -46,7 +49,7 @@ object DetailMobil : Screen {
         var merk by remember { mutableStateOf(mobil?.merk.orEmpty()) }
         var errorMerk by remember { mutableStateOf("") }
 
-        var nomorpolisi by remember { mutableStateOf(mobil?.nopol.orEmpty()) }
+        var nomorpolisi by remember { mutableStateOf(ArrayList(mobil?.nopol?.split(" ") ?: (1..3).map { "" })) }
         var errorNomorPolisi by remember { mutableStateOf("") }
 
         var tipe by remember { mutableStateOf(mobil?.tipe.orEmpty()) }
@@ -121,7 +124,7 @@ object DetailMobil : Screen {
                         errorMerk = ""
                         merk = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorMerk.isNotEmpty(),
@@ -138,18 +141,67 @@ object DetailMobil : Screen {
                     Text(text = "*", color = Color.Red)
                 }
                 spacerV(height = 8.dp)
-                OutlinedTextField(
-                    value = nomorpolisi,
-                    onValueChange = {
-                        errorNomorPolisi = ""
-                        nomorpolisi = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    isError = errorNomorPolisi.isNotEmpty(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-                )
+                Row(Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = nomorpolisi.getOrNull(0).orEmpty(),
+                        onValueChange = {
+                            if (!Pattern.compile("[A-Za-z]+").matcher(it)
+                                    .find() && it.isNotEmpty()
+                            ) return@OutlinedTextField
+                            if (it.length > 2) return@OutlinedTextField
+                            errorNomorPolisi = ""
+                            val _nomorpolisi = ArrayList(nomorpolisi)
+                            _nomorpolisi.set(0, it.uppercase().trim())
+                            nomorpolisi = _nomorpolisi
+                        },
+                        modifier = focusModifier(FocusDirection.Next)
+                            .weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        isError = errorNomorPolisi.isNotEmpty(),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    )
+                    spacerH(width = 8.dp)
+                    OutlinedTextField(
+                        value = nomorpolisi.getOrNull(1).orEmpty(),
+                        onValueChange = {
+                            if (!Pattern.compile("[0-9]+").matcher(it)
+                                    .find() && it.isNotEmpty()
+                            ) return@OutlinedTextField
+                            if (it.length > 4) return@OutlinedTextField
+                            errorNomorPolisi = ""
+                            val _nomorpolisi = ArrayList(nomorpolisi)
+                            _nomorpolisi.set(1, it.uppercase().trim())
+                            nomorpolisi = _nomorpolisi
+                        },
+                        modifier = focusModifier(FocusDirection.Next)
+                            .weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        isError = errorNomorPolisi.isNotEmpty(),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next,
+                            keyboardType = KeyboardType.Number
+                        )
+                    )
+                    spacerH(width = 8.dp)
+                    OutlinedTextField(
+                        value = nomorpolisi.getOrNull(2).orEmpty(),
+                        onValueChange = {
+                            if (!Pattern.compile("[A-Za-z]+").matcher(it)
+                                    .find() && it.isNotEmpty()
+                            ) return@OutlinedTextField
+                            if (it.length > 3) return@OutlinedTextField
+                            errorNomorPolisi = ""
+                            val _nomorpolisi = ArrayList(nomorpolisi)
+                            _nomorpolisi.set(2, it.uppercase().trim())
+                            nomorpolisi = _nomorpolisi
+                        },
+                        modifier = focusModifier()
+                            .weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        isError = errorNomorPolisi.isNotEmpty(),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    )
+                }
                 if (errorNomorPolisi.isNotEmpty()) Text(
                     text = errorNomorPolisi,
                     color = Color.Red,
@@ -193,7 +245,7 @@ object DetailMobil : Screen {
                     onValueChange = {
                         tahun = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(
@@ -209,7 +261,7 @@ object DetailMobil : Screen {
                     onValueChange = {
                         silinder = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(
@@ -225,7 +277,7 @@ object DetailMobil : Screen {
                     onValueChange = {
                         warna = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -238,7 +290,7 @@ object DetailMobil : Screen {
                     onValueChange = {
                         noRangka = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(
@@ -254,7 +306,7 @@ object DetailMobil : Screen {
                     onValueChange = {
                         noMesin = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(
@@ -270,20 +322,20 @@ object DetailMobil : Screen {
                     onValueChange = {
                         keterangan = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                 )
                 spacerV(height = 16.dp)
-                if (merk != mobil?.merk || nomorpolisi != mobil?.nopol || tahun != mobil?.tahun || silinder != mobil?.silinder || warna != mobil?.warna || noRangka != mobil?.norangka || noMesin != mobil?.nomesin || keterangan != mobil?.keterangan) Button(
+                if (merk != mobil?.merk || nomorpolisi.joinToString(" ") != mobil?.nopol || tahun != mobil?.tahun || silinder != mobil?.silinder || warna != mobil?.warna || noRangka != mobil?.norangka || noMesin != mobil?.nomesin || keterangan != mobil?.keterangan) Button(
                     onClick = {
                         if (merk.isEmpty()) {
                             errorMerk = "Merk tidak boleh kosong."
                             return@Button
                         }
-                        if (nomorpolisi.isEmpty()) {
+                        if (nomorpolisi.contains("")) {
                             errorNomorPolisi = "No. Polisi tidak boleh kosong."
                             return@Button
                         }
@@ -291,14 +343,14 @@ object DetailMobil : Screen {
                             mobil = Mobil(
                                 id = mobil?.id,
                                 customerid = mobil?.customerid,
-                                merk = merk,
-                                nopol = nomorpolisi, tipe = tipe,
-                                tahun = tahun,
-                                silinder = silinder,
-                                warna = warna,
-                                norangka = noRangka,
-                                nomesin = noMesin,
-                                keterangan = keterangan,
+                                merk = merk.trim(),
+                                nopol = nomorpolisi.joinToString(" ").trim(), tipe = tipe.trim(),
+                                tahun = tahun.trim(),
+                                silinder = silinder.trim(),
+                                warna = warna.trim(),
+                                norangka = noRangka.trim(),
+                                nomesin = noMesin.trim(),
+                                keterangan = keterangan.trim(),
                                 createdBy = mobil?.createdBy,
                                 createdAt = mobil?.createdAt,
                             ),

@@ -19,13 +19,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.feri.workshop.data.model.Produk
 import com.feri.workshop.data.model.Stock
-import com.feri.workshop.ui.helper.screenLoading
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.utils.showToast
 
@@ -70,7 +68,7 @@ object TambahStock : Sheets {
                     errorStock = ""
                     stock = it
                 },
-                modifier = Modifier
+                modifier = focusModifier()
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 isError = errorStock.isNotEmpty(),
@@ -92,7 +90,7 @@ object TambahStock : Sheets {
                 onValueChange = {
                     deskripsi = it
                 },
-                modifier = Modifier
+                modifier = focusModifier()
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 keyboardActions = KeyboardActions(onDone = {keyoboard?.hide()}),
@@ -108,7 +106,7 @@ object TambahStock : Sheets {
                         return@Button
                     }
                     produkVM.addStock(
-                        Stock(jumlah = stock.toLongOrNull() ?: 0,deskripsi = deskripsi),
+                        Stock(jumlah = stock.trim().toLongOrNull() ?: 0,deskripsi = deskripsi),
                         isLoading = { isLoading = it },
                         onSuccess = {
                             context.showToast("Berhasil menambahkan stocks")

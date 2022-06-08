@@ -26,16 +26,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.feri.workshop.R
+import com.feri.workshop.data.model.KategoriProduk
 import com.feri.workshop.data.model.Produk
-import com.feri.workshop.ui.helper.dividerSmallH
-import com.feri.workshop.ui.helper.screenLoading
-import com.feri.workshop.ui.helper.spacerH
-import com.feri.workshop.ui.helper.spacerV
+import com.feri.workshop.ui.helper.*
 import com.feri.workshop.ui.theme.PrimaryColor
 import com.feri.workshop.utils.capitalizeWords
 import com.feri.workshop.utils.toRupiahCurrency
@@ -48,12 +45,15 @@ object ListProduk : Screen {
     override fun screen(navController: NavHostController) {
         val context = LocalContext.current
         val produkVM = getMainActivity().produkViewModel
-        LaunchedEffect(key1 = true ){
+        LaunchedEffect(key1 = true) {
             produkVM.listProduk()
         }
         val createTransaksiViewModel = getMainActivity().transaksiViewModel
         val selectedproduk by remember { createTransaksiViewModel.selectedProduk }
         val produks by remember { produkVM.listProduk }
+        val listKategory by remember {
+            produkVM.kategoriProduk
+        }
         val isLoading by remember { produkVM.loadingListProduk }
         val keyboard = LocalSoftwareKeyboardController.current
         var search by remember { mutableStateOf("") }
@@ -76,10 +76,9 @@ object ListProduk : Screen {
                         value = search,
                         onValueChange = {
                             search = it
-                            produkVM.listProduk(query = search)
                         },
                         placeholder = { Text(text = "Cari produk kamu", color = Color.Gray) },
-                        modifier = Modifier
+                        modifier = focusModifier()
                             .weight(1f),
                         shape = RoundedCornerShape(16.dp),
                         trailingIcon = {
@@ -92,128 +91,138 @@ object ListProduk : Screen {
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(produks.filter { (it.getJumlahStock() > 0 && it.tipe == Produk.Tipe.BARANG) || it.tipe == Produk.Tipe.JASA }
-                        .groupBy { it.kategori.orEmpty() }.toList()) { item ->
+                    items(listKategory+ arrayListOf(KategoriProduk(id = "1122334455",nama = "Non-Kategori"))) { item ->
                         spacerV(height = 16.dp)
-                        Text(text = item.first, fontWeight = FontWeight.W600)
+                        Text(text = item.nama.orEmpty(), fontWeight = FontWeight.W600)
                         spacerV(height = 16.dp)
                         dividerSmallH()
-                        item.second.forEach {
-                            spacerV(height = 16.dp)
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    if (it.tipe == Produk.Tipe.BARANG) Icon(
-                                        painterResource(id = R.drawable.ic_box),
-                                        contentDescription = ""
-                                    )
-                                    else Icon(
-                                        imageVector = Icons.Default.BuildCircle,
-                                        contentDescription = "",
-                                        modifier = Modifier.size(26.dp)
-                                    )
-                                    spacerH(width = 16.dp)
-                                    Column {
-                                        Text(
-                                            text = it.nama.orEmpty().capitalizeWords(),
-                                            fontWeight = FontWeight.W600
+                        produks.map { it.getKategory().firstOrNull { it.id==item.id } to it}.filter { it.first?.id==item.id && ((it.second.getJumlahStock() > 0 && it.second.tipe == Produk.Tipe.BARANG) || it.second.tipe == Produk.Tipe.JASA) && it.second.deletedBy==null && it.second.nama.orEmpty().contains(search,true)}
+                            .forEach {
+                                spacerV(height = 16.dp)
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        if (it.second.tipe == Produk.Tipe.BARANG) Icon(
+                                            painterResource(id = R.drawable.ic_box),
+                                            contentDescription = ""
                                         )
-                                        if (it.diskon ?: 0.0 > 0.0) Text(
-                                            text = it.harga.toRupiahCurrency(),
-                                            textDecoration = TextDecoration.LineThrough,
-                                            color = Color.Red
+                                        else Icon(
+                                            imageVector = Icons.Default.BuildCircle,
+                                            contentDescription = "",
+                                            modifier = Modifier.size(26.dp)
                                         )
-                                        Text(
-                                            text = ((it.harga ?: 0.0) - (it.diskon
-                                                ?: 0.0)).toRupiahCurrency()
-                                        )
-                                        if (it.tipe == Produk.Tipe.BARANG) Text(
-                                            text = "Qty ${it.getJumlahStock()}",
-                                            fontSize = 12.sp,
-                                            color = Color.LightGray
-                                        )
-                                    }
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    selectedproduk.firstOrNull { it1 -> it1.produk!!.id == it.id }
-                                        ?.let {
-                                            if (it.produk!!.tipe == Produk.Tipe.BARANG) {
-                                                IconButton(onClick = {
-                                                    createTransaksiViewModel.addProduk(
-                                                        jumlah = it.jumlah!! - 1,
-                                                        produk = it.produk!!
-                                                    )
-                                                }) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.RemoveCircleOutline,
-                                                        contentDescription = ""
-                                                    )
-                                                }
-                                                BasicTextField(
-                                                    value = it.jumlah.toString(),
-                                                    onValueChange = { text ->
-                                                        if (!text.isEmpty()) {
-                                                            createTransaksiViewModel.addProduk(
-                                                                jumlah = text.toIntOrNull() ?: 0,
-                                                                produk = it.produk!!
-                                                            )
-                                                        }
-                                                    },
-                                                    textStyle = TextStyle(
-                                                        color = Color.White,
-                                                        textAlign = TextAlign.Center
-                                                    ),
-                                                    cursorBrush = SolidColor(value = Color.White),
-                                                    modifier = Modifier.width(50.dp),
-                                                    singleLine = true,
-                                                    keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
-                                                    keyboardOptions = KeyboardOptions(
-                                                        keyboardType = KeyboardType.Number,
-                                                        imeAction = ImeAction.Done
-                                                    )
-                                                )
-                                                IconButton(onClick = {
-                                                    createTransaksiViewModel.addProduk(
-                                                        jumlah = it.jumlah!! + 1,
-                                                        produk = it.produk!!
-                                                    )
-                                                }) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.AddCircleOutline,
-                                                        contentDescription = ""
-                                                    )
-                                                }
-                                            } else {
-                                                Text(text = "1x")
-                                                IconButton(onClick = {
-                                                    createTransaksiViewModel.addProduk(
-                                                        jumlah = 0,
-                                                        produk = it.produk!!
-                                                    )
-                                                }) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.RemoveShoppingCart,
-                                                        contentDescription = ""
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        ?: IconButton(onClick = { createTransaksiViewModel.addProduk(produk = it) }) {
-                                            Icon(
-                                                imageVector = Icons.Default.AddShoppingCart,
-                                                contentDescription = ""
+                                        spacerH(width = 16.dp)
+                                        Column {
+                                            Text(
+                                                text = it.second.nama.orEmpty().capitalizeWords(),
+                                                fontWeight = FontWeight.W600
+                                            )
+                                            Text(
+                                                text = (it.first?.harga?:(it.second.harga ?: 0.0)).toRupiahCurrency()
+                                            )
+                                            if (it.second.tipe == Produk.Tipe.BARANG) Text(
+                                                text = "Qty ${it.second.getJumlahStock()}",
+                                                fontSize = 12.sp,
+                                                color = Color.LightGray
                                             )
                                         }
+                                    }
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        selectedproduk.firstOrNull { it1 -> it1.produk!!.id == it.second.id && it1.kategori?.id== it.first?.id}
+                                            ?.let {
+                                                if (it.produk!!.tipe == Produk.Tipe.BARANG) {
+                                                    IconButton(onClick = {
+                                                        createTransaksiViewModel.addProduk(
+                                                            jumlah = it.jumlah!! - 1,
+                                                            produk = it.produk,
+                                                            kategori = it.kategori!!
+                                                        )
+                                                    }) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.RemoveCircleOutline,
+                                                            contentDescription = ""
+                                                        )
+                                                    }
+                                                    BasicTextField(
+                                                        value = it.jumlah.toString(),
+                                                        onValueChange = { text ->
+                                                            if (!text.isEmpty()) {
+                                                                createTransaksiViewModel.addProduk(
+                                                                    jumlah = text.toIntOrNull()
+                                                                        ?: 0,
+                                                                    produk = it.produk,
+                                                                    kategori = it.kategori!!
+                                                                )
+                                                            }
+                                                        },
+                                                        textStyle = TextStyle(
+                                                            color = Color.White,
+                                                            textAlign = TextAlign.Center
+                                                        ),
+                                                        cursorBrush = SolidColor(value = Color.White),
+                                                        modifier = Modifier.width(50.dp),
+                                                        singleLine = true,
+                                                        keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
+                                                        keyboardOptions = KeyboardOptions(
+                                                            keyboardType = KeyboardType.Number,
+                                                            imeAction = ImeAction.Done
+                                                        )
+                                                    )
+                                                    IconButton(onClick = {
+                                                        it.kategori?.let { it1 ->
+                                                            createTransaksiViewModel.addProduk(
+                                                                jumlah = it.jumlah!! + 1,
+                                                                produk = it.produk,
+                                                                kategori = it1
+                                                            )
+                                                        }
+                                                    }) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.AddCircleOutline,
+                                                            contentDescription = ""
+                                                        )
+                                                    }
+                                                } else {
+                                                    Text(text = "1x")
+                                                    IconButton(onClick = {
+                                                        it.kategori?.let { it1 ->
+                                                            createTransaksiViewModel.addProduk(
+                                                                jumlah = 0,
+                                                                produk = it.produk!!,
+                                                                kategori = it1
+                                                            )
+                                                        }
+                                                    }) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.RemoveShoppingCart,
+                                                            contentDescription = ""
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            ?: IconButton(onClick = {
+                                                it.first?.let { it1 ->
+                                                    createTransaksiViewModel.addProduk(
+                                                        produk = it.second,
+                                                        kategori = it1
+                                                    )
+                                                }
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.AddShoppingCart,
+                                                    contentDescription = ""
+                                                )
+                                            }
+                                    }
                                 }
                             }
-                        }
                     }
                     item {
-                        spacerV(height = 60.dp)
+                        spacerV(height = 100.dp)
                     }
                 }
             }
@@ -233,8 +242,7 @@ object ListProduk : Screen {
                             Text(text = "Total Harga", fontSize = 12.sp)
                             Text(
                                 text = selectedproduk.map {
-                                    it.jumlah!! * ((it.produk!!.harga ?: 0.0) - (it.produk.diskon
-                                        ?: 0.0))
+                                    it.jumlah!! * ((it.produk!!.harga ?: 0.0))
                                 }.sum().toRupiahCurrency(),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.W500

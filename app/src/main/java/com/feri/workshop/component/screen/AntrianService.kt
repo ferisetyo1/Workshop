@@ -12,10 +12,12 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.CreditCardOff
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.CarRepair
-import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.feri.workshop.component.sheet.RentangTanggal
 import com.feri.workshop.data.model.Transaksi
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.PrimaryColor
@@ -48,15 +51,16 @@ object AntrianService : Screen {
         LaunchedEffect(key1 = true) {
             rentangVM.reset()
         }
+        var isCredit by rememberSaveable { mutableStateOf(false) }
         var search by rememberSaveable { mutableStateOf("") }
         var expandMenu by rememberSaveable { mutableStateOf(false) }
-        var type by rememberSaveable { mutableStateOf("Hari ini") }
-        var status by rememberSaveable { mutableStateOf(Transaksi.STATUS.Menunggu) }
+        var type by rememberSaveable { transaksiVM.selectedType }
+        var status by rememberSaveable { transaksiVM.selectedStatus }
         val startDate by rememberSaveable { rentangVM.startDate }
         val endDate by rememberSaveable { rentangVM.endDate }
         val onFilterRentang by rememberSaveable { rentangVM.onFilter }
         LaunchedEffect(key1 = onFilterRentang) {
-            if (onFilterRentang) type = "Rentang"
+            if (onFilterRentang) transaksiVM.selectedType.value = "Rentang"
         }
         val listTransaksi by remember { transaksiVM.listTransaksi }
         val filterTransaksi = listTransaksi.sortedByDescending { it.createdAt }.filter {
@@ -82,6 +86,10 @@ object AntrianService : Screen {
                         Transaksi.STATUS.Diproses -> it.status == Transaksi.STATUS.Diproses
                         Transaksi.STATUS.Dibatalkan -> it.status == Transaksi.STATUS.Dibatalkan
                         else -> it.status == Transaksi.STATUS.Selesai
+                    } &&
+                    when (isCredit) {
+                        true -> it.paidValue != it.getTotal()
+                        else -> true
                     }
         }
 
@@ -108,7 +116,7 @@ object AntrianService : Screen {
                             search = it
                         },
                         placeholder = { Text(text = "Cari Transaksi", color = Color.Gray) },
-                        modifier = Modifier
+                        modifier = focusModifier()
                             .weight(1f),
                         shape = RoundedCornerShape(16.dp),
                         trailingIcon = {
@@ -116,10 +124,20 @@ object AntrianService : Screen {
                         }
                     )
                     spacerH(width = 4.dp)
+                    IconToggleButton(checked = isCredit, onCheckedChange = { isCredit = it }) {
+                        if (isCredit) Icon(
+                            imageVector = Icons.Default.CreditCard,
+                            contentDescription = ""
+                        )
+                        else Icon(
+                            imageVector = Icons.Default.CreditCardOff,
+                            contentDescription = ""
+                        )
+                    }
                     Box {
                         IconButton(onClick = { expandMenu = true }) {
                             Icon(
-                                imageVector = Icons.Outlined.FilterAlt,
+                                imageVector = Icons.Outlined.DateRange,
                                 contentDescription = "",
                                 tint = Color.White
                             )
@@ -129,25 +147,25 @@ object AntrianService : Screen {
                             expanded = expandMenu,
                             onDismissRequest = { expandMenu = false }) {
                             DropdownMenuItem(onClick = {
-                                type = "Semua"
+                                transaksiVM.selectedType.value = "Semua"
                                 expandMenu = false
                             }) {
                                 Text(text = "Semua")
                             }
                             DropdownMenuItem(onClick = {
-                                type = "Hari ini"
+                                transaksiVM.selectedType.value = "Hari ini"
                                 expandMenu = false
                             }) {
                                 Text(text = "Hari ini")
                             }
                             DropdownMenuItem(onClick = {
-                                type = "Minggu ini"
+                                transaksiVM.selectedType.value = "Minggu ini"
                                 expandMenu = false
                             }) {
                                 Text(text = "Minggu ini")
                             }
                             DropdownMenuItem(onClick = {
-                                type = "Bulan ini"
+                                transaksiVM.selectedType.value = "Bulan ini"
                                 expandMenu = false
                             }) {
                                 Text(text = "Bulan ini")
@@ -170,7 +188,7 @@ object AntrianService : Screen {
                 ) {
                     spacerH(width = 16.dp)
                     Chip(
-                        onClick = { status = "Semua" },
+                        onClick = { transaksiVM.selectedStatus.value = "Semua" },
                         border = BorderStroke(
                             color = if (status == "Semua") PrimaryColor else SurfaceColor,
                             width = 1.dp
@@ -180,7 +198,7 @@ object AntrianService : Screen {
                     }
                     spacerH(width = 8.dp)
                     Chip(
-                        onClick = { status = Transaksi.STATUS.Menunggu },
+                        onClick = { transaksiVM.selectedStatus.value = Transaksi.STATUS.Menunggu },
                         border = BorderStroke(
                             color = if (status == Transaksi.STATUS.Menunggu) PrimaryColor else SurfaceColor,
                             width = 1.dp
@@ -190,7 +208,7 @@ object AntrianService : Screen {
                     }
                     spacerH(width = 8.dp)
                     Chip(
-                        onClick = { status = Transaksi.STATUS.Diproses },
+                        onClick = { transaksiVM.selectedStatus.value = Transaksi.STATUS.Diproses },
                         border = BorderStroke(
                             color = if (status == Transaksi.STATUS.Diproses) PrimaryColor else SurfaceColor,
                             width = 1.dp
@@ -200,7 +218,7 @@ object AntrianService : Screen {
                     }
                     spacerH(width = 8.dp)
                     Chip(
-                        onClick = { status = Transaksi.STATUS.Selesai },
+                        onClick = { transaksiVM.selectedStatus.value = Transaksi.STATUS.Selesai },
                         border = BorderStroke(
                             color = if (status == Transaksi.STATUS.Selesai) PrimaryColor else SurfaceColor,
                             width = 1.dp
@@ -210,7 +228,7 @@ object AntrianService : Screen {
                     }
                     spacerH(width = 8.dp)
                     Chip(
-                        onClick = { status = Transaksi.STATUS.Dibatalkan },
+                        onClick = { transaksiVM.selectedStatus.value = Transaksi.STATUS.Dibatalkan },
                         border = BorderStroke(
                             color = if (status == Transaksi.STATUS.Dibatalkan) PrimaryColor else SurfaceColor,
                             width = 1.dp
@@ -290,15 +308,24 @@ object AntrianService : Screen {
                                     )
                                 }
                                 spacerH(width = 8.dp)
-                                Text(
-                                    text = it.status.orEmpty().capitalizeWords(),
-                                    color = when (it.status) {
-                                        Transaksi.STATUS.Selesai->Color.Green
-                                        Transaksi.STATUS.Dibatalkan->Color.Red
-                                        else -> PrimaryColor
-                                    },
-                                    fontWeight = FontWeight.W600
-                                )
+                                Column (horizontalAlignment = Alignment.CenterHorizontally){
+                                    Text(
+                                        text = it.status.orEmpty().capitalizeWords(),
+                                        color = when (it.status) {
+                                            Transaksi.STATUS.Selesai -> Color.Green
+                                            Transaksi.STATUS.Dibatalkan -> Color.Red
+                                            else -> PrimaryColor
+                                        },
+                                        fontWeight = FontWeight.W600
+                                    )
+                                    Text(text = when(it.paidValue==it.getTotal()){
+                                        true->"(Lunas)"
+                                        else->"(Belum Lunas)"
+                                    },color = when(it.paidValue==it.getTotal()){
+                                        true->Color.Green
+                                        else->Color.Red
+                                    })
+                                }
                             }
                         }
                         spacerV(height = 16.dp)

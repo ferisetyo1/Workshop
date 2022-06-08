@@ -1,6 +1,7 @@
 package com.feri.workshop.component.screen
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.feri.workshop.component.viewmodel.LoginViewModel
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.utils.isValidEmail
@@ -71,7 +73,7 @@ object Login : Screen {
                     emailError = ""
                     email = it
                 },
-                modifier = Modifier
+                modifier = focusModifier()
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(8.dp),
@@ -96,7 +98,7 @@ object Login : Screen {
                     passwordError = ""
                     password = it
                 },
-                modifier = Modifier
+                modifier = focusModifier()
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(8.dp),
@@ -121,6 +123,16 @@ object Login : Screen {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
+            spacerV(height = 8.dp)
+            Column(
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                Text("Lupa password?", modifier = Modifier
+                    .clickable { navController.navigate(ForgotPassword.routeName)}
+                    .align(Alignment.End))
+            }
             spacerV(height = 32.dp)
             Button(
                 onClick = {
@@ -137,10 +149,10 @@ object Login : Screen {
                         return@Button
                     }
                     loginVM.login(
-                        email = email,
+                        email = email.trim(),
                         password = password,
                         onSuccess = {
-                            navController.navigate(Beranda.routeName) {
+                            navController.navigate(Splash.routeName) {
                                 popUpTo(routeName) { inclusive = true }
                                 launchSingleTop = true
                             }
@@ -159,6 +171,10 @@ object Login : Screen {
             ) {
                 Text(text = "Masuk")
             }
+
+
+            Text("Tidak punya akun? klik disini untuk Register", modifier = Modifier
+                .clickable { navController.navigate(Register.routeName)})
         }
     }
 }

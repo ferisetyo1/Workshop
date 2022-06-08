@@ -63,7 +63,7 @@ object MetodePembayaran : Sheets {
                 listOf(
                     "Tunai - Cash",
                     "Tunai - BCA",
-                    "Tunai - Mandiri",
+                    "Tunai - BRI",
                     "Sebagian"
                 ).forEach { text ->
                     Row(
@@ -75,11 +75,11 @@ object MetodePembayaran : Sheets {
                                 selected = (text == selectedOption),
                                 onClick = {
                                     val subtotal = createTransaksiViewModel.selectedProduk.value.map {
-                                        it.jumlah!! * it.produk!!.getFixHarga()
+                                        it.getTotal()
                                     }.sum()
                                     val subOthersPayment = createTransaksiViewModel.othersPayment.value.map { it.value ?: 0.0 }.sum()
                                     val ppn = if (createTransaksiViewModel.enablePPn.value) ((subtotal + subOthersPayment) * createTransaksiViewModel.ppnValue.value) / 100 else 0.0
-                                    val total = subtotal + subOthersPayment + ppn
+                                    val total = subtotal + subOthersPayment + ppn - createTransaksiViewModel.diskonValue.value
                                     createTransaksiViewModel.paidValue.value = total.toInt()
                                     createTransaksiViewModel.selectedMetodePembayaran.value = text
                                 },

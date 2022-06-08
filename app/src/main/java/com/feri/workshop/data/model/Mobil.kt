@@ -20,6 +20,8 @@ data class Mobil(
     val createdBy: String? = null,
     val isdelete: Boolean? = false,
     val lastTransaksion: Long? = null,
+    val oldKM:Int?=null,
+    val newKM:Int?=null,
 ) {
     object TipeMobil {
         const val automatic = "automatic"

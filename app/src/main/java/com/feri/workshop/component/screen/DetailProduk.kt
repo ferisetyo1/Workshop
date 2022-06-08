@@ -1,7 +1,6 @@
 package com.feri.workshop.component.screen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -25,18 +24,24 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavHostController
 import com.feri.workshop.component.sheet.TambahStock
 import com.feri.workshop.data.model.Produk
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.BackgroundColor
 import com.feri.workshop.ui.theme.PrimaryColor
+import com.feri.workshop.utils.removedat
 import com.feri.workshop.utils.showToast
 import com.feri.workshop.utils.toFormattedString
 import com.google.accompanist.flowlayout.FlowRow
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.collections.ArrayList
 
 object DetailProduk : Screen {
     override val routeName = "dailproduk"
@@ -45,7 +50,7 @@ object DetailProduk : Screen {
     @ExperimentalComposeUiApi
     @Composable
     override fun screen(navController: NavHostController) {
-        val context= LocalContext.current
+        val context = LocalContext.current
         val produkVM = getMainActivity().produkViewModel
 
         val selectedProduk by remember { produkVM.selectedproduct }
@@ -53,15 +58,10 @@ object DetailProduk : Screen {
         var nama by remember { mutableStateOf(selectedProduk?.nama.orEmpty()) }
         var errorNama by remember { mutableStateOf("") }
 
-        var harga by remember { mutableStateOf((selectedProduk?.harga ?: 0.0).toInt().toString()) }
+        var hargaPokok by remember { mutableStateOf((selectedProduk?.hargaPokok ?: 0.0).toInt()) }
+        var errorHargaPokok by remember { mutableStateOf("") }
+        var harga by remember { mutableStateOf((selectedProduk?.harga ?: 0.0).toInt()) }
         var errorHarga by remember { mutableStateOf("") }
-
-        var diskon by remember {
-            mutableStateOf(
-                (selectedProduk?.diskon ?: 0.0).toInt().toString()
-            )
-        }
-        var errorDiskon by remember { mutableStateOf("") }
 
         var kategori by remember { mutableStateOf(selectedProduk?.kategori.orEmpty()) }
         var errorKategori by remember { mutableStateOf("") }
@@ -89,6 +89,32 @@ object DetailProduk : Screen {
                     }
                 },
                 actions = {
+                    if (selectedProduk?.deletedBy == null) IconButton(onClick = {
+                        selectedProduk?.let {
+                            produkVM.removeProduck(
+                                selectedProduk = it,
+                                onSuccess = { navController.navigateUp() })
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                    }
+                    else IconButton(onClick = {
+                        selectedProduk?.let {
+                            produkVM.editProduk(
+                                produk = it.copy(deletedBy = null, deletedAt = Date().time),
+                                onSuccess = { navController.navigateUp() })
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.AddCircleOutline,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                    }
                 },
                 backgroundColor = Color.Transparent,
                 contentColor = Color.Transparent,
@@ -101,6 +127,40 @@ object DetailProduk : Screen {
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
+                spacerV(height = 8.dp)
+                selectedProduk?.let { produk ->
+                    produk.createdBy?.let {
+                        spacerV(height = 8.dp)
+                        Text(
+                            text = "Dibuat oleh : ${it.removedat()} (${
+                                Date(produk.createdAt ?: 0).toFormattedString(
+                                    "dd/MM/yyyy HH:mm"
+                                )
+                            })", fontSize = 12.sp
+                        )
+                    }
+                    produk.modifiedBy?.let {
+                        spacerV(height = 8.dp)
+                        Text(
+                            text = "Terakhir diubah oleh : ${it.removedat()} (${
+                                Date(produk.modifiedAt ?: 0).toFormattedString(
+                                    "dd/MM/yyyy HH:mm"
+                                )
+                            })", fontSize = 12.sp
+                        )
+                    }
+                    produk.deletedBy?.let {
+                        spacerV(height = 8.dp)
+                        Text(
+                            text = "Dihapus oleh : ${it.removedat()} (${
+                                Date(produk.deletedAt ?: 0).toFormattedString(
+                                    "dd/MM/yyyy HH:mm"
+                                )
+                            })", fontSize = 12.sp
+                        )
+                    }
+                }
+                spacerV(height = 8.dp)
                 Row {
                     Text(text = "Nama")
                     Text(text = "*", color = Color.Red)
@@ -110,9 +170,9 @@ object DetailProduk : Screen {
                     value = nama,
                     onValueChange = {
                         errorNama = ""
-                        nama = it
+                        nama = it.uppercase()
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorNama.isNotEmpty(),
@@ -125,17 +185,43 @@ object DetailProduk : Screen {
                 )
                 spacerV(height = 16.dp)
                 Row {
-                    Text(text = "Harga")
+                    Text(text = "Harga Pokok")
                     Text(text = "*", color = Color.Red)
                 }
                 spacerV(height = 8.dp)
                 OutlinedTextField(
-                    value = harga,
+                    value = hargaPokok.toString(),
                     onValueChange = {
                         errorHarga = ""
-                        if (it.length < 12) harga = it
+                        if (it.isDigitsOnly()) hargaPokok = it.toIntOrNull() ?: 0
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    isError = errorHargaPokok.isNotEmpty(),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    )
+                )
+                if (errorHargaPokok.isNotEmpty()) Text(
+                    text = errorHargaPokok,
+                    color = Color.Red,
+                    fontSize = 12.sp
+                )
+                spacerV(height = 16.dp)
+                Row {
+                    Text(text = "Harga Jual")
+                    Text(text = "*", color = Color.Red)
+                }
+                spacerV(height = 8.dp)
+                OutlinedTextField(
+                    value = harga.toString(),
+                    onValueChange = {
+                        errorHarga = ""
+                        if (it.isDigitsOnly()) harga = it.toIntOrNull() ?: 0
+                    },
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorHarga.isNotEmpty(),
@@ -151,41 +237,30 @@ object DetailProduk : Screen {
                 )
                 spacerV(height = 16.dp)
                 Row {
-                    Text(text = "Diskon")
-                    Text(text = "*", color = Color.Red)
-                }
-                spacerV(height = 8.dp)
-                OutlinedTextField(
-                    value = diskon,
-                    onValueChange = {
-                        errorDiskon = ""
-                        diskon = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    isError = errorDiskon.isNotEmpty(),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Number
-                    )
-                )
-                if (errorDiskon.isNotEmpty()) Text(
-                    text = errorDiskon,
-                    color = Color.Red,
-                    fontSize = 12.sp
-                )
-                spacerV(height = 16.dp)
-                Row {
                     Text(text = "Kategori")
                     Text(text = "*", color = Color.Red)
                 }
                 spacerV(height = 8.dp)
                 FlowRow(mainAxisSpacing = 8.dp) {
-                    listKategory.map { it.nama.orEmpty() }.forEach {
+                    listKategory.forEach { kname ->
+                        val index = kategori.indexOfFirst { it.id == kname.id }
                         Button(
-                            onClick = { kategori = it },
-                            colors = if (kategori == it) buttonColors(
+                            onClick = {
+                                kategori = ArrayList(kategori).apply {
+                                    if (index == -1) {
+                                        add(
+                                            Produk.Kategori(
+                                                id = kname.id,
+                                                harga = 0.0,
+                                                nama = kname.nama
+                                            )
+                                        )
+                                    } else {
+                                        removeAt(index)
+                                    }
+                                }
+                            },
+                            colors = if (index != -1) buttonColors(
                                 PrimaryColor.copy(
                                     alpha = 0.75f
                                 )
@@ -193,7 +268,7 @@ object DetailProduk : Screen {
                             else buttonColors(BackgroundColor),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text(text = it)
+                            Text(text = kname.nama.orEmpty())
                         }
                     }
                     Button(
@@ -220,6 +295,28 @@ object DetailProduk : Screen {
                     fontSize = 12.sp
                 )
                 spacerV(height = 16.dp)
+                kategori.forEachIndexed { index, data ->
+                    Text(text = "Harga untuk kategori ${data.nama}")
+                    spacerV(height = 8.dp)
+                    OutlinedTextField(
+                        value = data.harga?.toInt().toString(),
+                        onValueChange = {
+                            if (it.isDigitsOnly()) {
+                                kategori = ArrayList(kategori).apply {
+                                    set(index, data.copy(harga = it.toDoubleOrNull() ?: 0.0))
+                                }
+                            }
+                        },
+                        modifier = focusModifier()
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        )
+                    )
+                    spacerV(height = 16.dp)
+                }
                 Text(text = "Barang/Jasa")
                 spacerV(height = 8.dp)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -259,7 +356,7 @@ object DetailProduk : Screen {
                     onValueChange = {
                         deskripsi = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
@@ -268,8 +365,8 @@ object DetailProduk : Screen {
 
                 if (selectedProduk?.tipe != tipe ||
                     selectedProduk?.nama != nama ||
-                    (selectedProduk?.harga ?: 0.0).toInt().toString() != harga ||
-                    (selectedProduk?.diskon ?: 0.0).toInt().toString() != diskon ||
+                    (selectedProduk?.hargaPokok ?: 0.0).toInt() != hargaPokok ||
+                    (selectedProduk?.harga ?: 0.0).toInt() != harga ||
                     selectedProduk?.kategori != kategori ||
                     selectedProduk?.deskripsi != deskripsi
                 ) {
@@ -280,37 +377,21 @@ object DetailProduk : Screen {
                                 errorNama = "Nama tidak boleh kosong."
                                 return@Button
                             }
-                            if (harga.isEmpty()) {
-                                errorHarga = "Harga tidak boleh kosong."
-                                return@Button
-                            }
-                            if (diskon.isEmpty()) {
-                                errorDiskon = "Merk tidak boleh kosong."
-                                return@Button
-                            }
-                            if (kategori.isEmpty()) {
-                                errorKategori = "Pilih salah satu kategori"
-                                return@Button
-                            }
-
-                            if ((diskon.toDoubleOrNull()?:0.0)>(harga.toDoubleOrNull()?:0.0)) {
-                                errorDiskon = "Diskon tidak boleh lebih besar dari harga"
-                                return@Button
-                            }
 
                             selectedProduk?.copy(
                                 nama = nama,
                                 tipe = tipe,
-                                harga = harga.toDoubleOrNull() ?: 0.0,
-                                diskon = diskon.toDoubleOrNull() ?: 0.0,
+                                hargaPokok = hargaPokok.toDouble(),
+                                harga = harga.toDouble(),
                                 kategori = kategori,
-                                deskripsi = deskripsi
+                                deskripsi = deskripsi,
+                                modifiedBy = Firebase.auth.currentUser?.email
                             )?.let { it1 ->
                                 produkVM.editProduk(
                                     it1,
-                                    isLoading = {isLoading=it},
-                                    onSuccess = {context.showToast("Berhasil mengubah produk")},
-                                    onFailed = {context.showToast("Gagal mengubah produk")}
+                                    isLoading = { isLoading = it },
+                                    onSuccess = { context.showToast("Berhasil mengubah produk") },
+                                    onFailed = { context.showToast("Gagal mengubah produk") }
                                 )
                             }
                         },
@@ -361,7 +442,7 @@ object DetailProduk : Screen {
                                 }
                                 Text(text = stock.deskripsi.orEmpty())
                             }
-                            IconButton(onClick = {
+                            if (stock.isJual == false) IconButton(onClick = {
                                 produkVM.removeStock(stock)
                             }) {
                                 Icon(

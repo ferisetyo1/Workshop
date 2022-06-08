@@ -15,13 +15,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.feri.workshop.R
 import com.feri.workshop.data.model.Produk
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
@@ -55,10 +56,9 @@ object ManagementProduk : Screen {
                         value = search,
                         onValueChange = {
                             search = it
-                            produkVM.listProduk(query = search)
                         },
                         placeholder = { Text(text = "Cari produk kamu", color = Color.Gray) },
-                        modifier = Modifier
+                        modifier = focusModifier()
                             .weight(1f),
                         shape = RoundedCornerShape(16.dp),
                         trailingIcon = {
@@ -75,7 +75,7 @@ object ManagementProduk : Screen {
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(produks) {
+                    items(produks.filter { it.nama.orEmpty().contains(search,true) }) {
                         spacerV(height = 16.dp)
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -104,15 +104,12 @@ object ManagementProduk : Screen {
                                         text = it.nama.orEmpty().capitalizeWords(),
                                         fontWeight = FontWeight.W600
                                     )
-                                    if (it.diskon ?: 0.0 > 0.0) Text(
-                                        text = it.harga.toRupiahCurrency(),
-                                        textDecoration = TextDecoration.LineThrough,
-                                        color = Color.Red
-                                    )
                                     Text(
-                                        text = ((it.harga ?: 0.0) - (it.diskon
-                                            ?: 0.0)).toRupiahCurrency()
+                                        text = ((it.harga ?: 0.0)).toRupiahCurrency()
                                     )
+                                    it.deletedBy?.let {
+                                        Text(text = "Produk telah dihapus",fontSize = 12.sp,fontWeight = FontWeight.W600,fontStyle = FontStyle.Italic,color = Color.Red)
+                                    }
                                 }
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -138,7 +135,7 @@ object ManagementProduk : Screen {
                                             modifier = Modifier.offset(x = 2.dp, y = 2.5.dp)
                                         )
                                         spacerH(width = 4.dp)
-                                        Text(text = "Terjual 10rb+", fontSize = 12.sp)
+                                        Text(text = "Terjual ${it.getJumlahTerjual()}", fontSize = 12.sp)
                                     }
                                 }
                                 spacerH(width = 14.dp)

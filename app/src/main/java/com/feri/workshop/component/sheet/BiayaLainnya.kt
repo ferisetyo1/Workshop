@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.spacerV
 
 object BiayaLainnya : Sheets {
@@ -65,9 +66,9 @@ object BiayaLainnya : Sheets {
                 value = nama,
                 onValueChange = {
                     errorNama = ""
-                    nama = it
+                    nama = it.uppercase()
                 },
-                modifier = Modifier
+                modifier = focusModifier()
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 isError = errorNama.isNotEmpty(),
@@ -90,7 +91,7 @@ object BiayaLainnya : Sheets {
                     errorValue = ""
                     value = it
                 },
-                modifier = Modifier
+                modifier = focusModifier()
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 isError = errorValue.isNotEmpty(),

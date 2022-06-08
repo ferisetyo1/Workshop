@@ -3,11 +3,9 @@ package com.feri.workshop.component.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -27,6 +25,7 @@ import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
 import com.feri.workshop.data.model.KategoriProduk
 import com.feri.workshop.ui.helper.dividerSmallH
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.utils.showToast
@@ -41,7 +40,9 @@ object AddKategoriProduk : Screen {
         val context = LocalContext.current
         val activity = context as MainActivity
         val produkVM = activity.produkViewModel
+        val mainVM = activity.mainViewModel
 
+        val user by remember{mainVM.currentAccount}
         var nama by remember { mutableStateOf("") }
         var errorNama by remember { mutableStateOf("") }
 
@@ -86,9 +87,9 @@ object AddKategoriProduk : Screen {
                     value = nama,
                     onValueChange = {
                         errorNama = ""
-                        nama = it
+                        nama = it.uppercase()
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorNama.isNotEmpty(),
@@ -111,7 +112,7 @@ object AddKategoriProduk : Screen {
                         produkVM.addKategori(
                             kategori = KategoriProduk(
                                 nama = nama,
-                                createdBy = "feri"
+                                createdBy = user?.email
                             ),
                             isLoading = { isLoading = it },
                             onSuccess = {

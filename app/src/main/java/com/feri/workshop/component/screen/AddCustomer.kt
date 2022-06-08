@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -25,13 +26,15 @@ import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
 import com.feri.workshop.data.model.Customer
 import com.feri.workshop.data.model.Mobil
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.screenLoading
 import com.feri.workshop.ui.helper.spacerH
 import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.BackgroundColor
 import com.feri.workshop.ui.theme.PrimaryColor
 import com.feri.workshop.utils.showToast
-import java.util.*
+import java.util.regex.Pattern
+import kotlin.collections.ArrayList
 
 object AddCustomer : Screen {
     override val routeName = "Tambah Pelanggan"
@@ -42,7 +45,9 @@ object AddCustomer : Screen {
         val context = LocalContext.current
         val activity = context as MainActivity
         val customerVM = activity.customerViewModel
+        val mainVM = activity.mainViewModel
 
+        val user by remember { mainVM.currentAccount }
         var namapelanggan by remember { mutableStateOf("") }
         var errorNamaPelanggan by remember { mutableStateOf("") }
 
@@ -55,7 +60,7 @@ object AddCustomer : Screen {
         var merk by remember { mutableStateOf("") }
         var errorMerk by remember { mutableStateOf("") }
 
-        var nomorpolisi by remember { mutableStateOf("") }
+        var nomorpolisi by remember { mutableStateOf(arrayListOf("", "", "")) }
         var errorNomorPolisi by remember { mutableStateOf("") }
 
         var tipe by remember { mutableStateOf(Mobil.TipeMobil.automatic) }
@@ -114,9 +119,9 @@ object AddCustomer : Screen {
                     value = namapelanggan,
                     onValueChange = {
                         errorNamaPelanggan = ""
-                        namapelanggan = it
+                        namapelanggan = it.uppercase()
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorNamaPelanggan.isNotEmpty(),
@@ -139,7 +144,7 @@ object AddCustomer : Screen {
                         errorPhoneNumber = ""
                         nomortelfon = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorPhoneNumber.isNotEmpty(),
@@ -165,7 +170,7 @@ object AddCustomer : Screen {
                         errorAlamat = ""
                         alamat = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorAlamat.isNotEmpty(),
@@ -188,7 +193,7 @@ object AddCustomer : Screen {
                         errorMerk = ""
                         merk = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     isError = errorMerk.isNotEmpty(),
@@ -205,18 +210,67 @@ object AddCustomer : Screen {
                     Text(text = "*", color = Color.Red)
                 }
                 spacerV(height = 8.dp)
-                OutlinedTextField(
-                    value = nomorpolisi,
-                    onValueChange = {
-                        errorNomorPolisi = ""
-                        nomorpolisi = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    isError = errorNomorPolisi.isNotEmpty(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-                )
+                Row(Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = nomorpolisi.get(0),
+                        onValueChange = {
+                            if (!Pattern.compile("[A-Za-z]+").matcher(it)
+                                    .find() && it.isNotEmpty()
+                            ) return@OutlinedTextField
+                            if (it.length > 2) return@OutlinedTextField
+                            errorNomorPolisi = ""
+                            val _nomorpolisi = ArrayList(nomorpolisi)
+                            _nomorpolisi.set(0, it.uppercase())
+                            nomorpolisi = _nomorpolisi
+                        },
+                        modifier = focusModifier(FocusDirection.Next)
+                            .weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        isError = errorNomorPolisi.isNotEmpty(),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    )
+                    spacerH(width = 8.dp)
+                    OutlinedTextField(
+                        value = nomorpolisi.get(1),
+                        onValueChange = {
+                            if (!Pattern.compile("[0-9]+").matcher(it)
+                                    .find() && it.isNotEmpty()
+                            ) return@OutlinedTextField
+                            if (it.length > 4) return@OutlinedTextField
+                            errorNomorPolisi = ""
+                            val _nomorpolisi = ArrayList(nomorpolisi)
+                            _nomorpolisi.set(1, it.uppercase())
+                            nomorpolisi = _nomorpolisi
+                        },
+                        modifier = focusModifier(FocusDirection.Next)
+                            .weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        isError = errorNomorPolisi.isNotEmpty(),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next,
+                            keyboardType = KeyboardType.Number
+                        )
+                    )
+                    spacerH(width = 8.dp)
+                    OutlinedTextField(
+                        value = nomorpolisi.get(2),
+                        onValueChange = {
+                            if (!Pattern.compile("[A-Za-z]+").matcher(it)
+                                    .find() && it.isNotEmpty()
+                            ) return@OutlinedTextField
+                            if (it.length > 3) return@OutlinedTextField
+                            errorNomorPolisi = ""
+                            val _nomorpolisi = ArrayList(nomorpolisi)
+                            _nomorpolisi.set(2, it.uppercase())
+                            nomorpolisi = _nomorpolisi
+                        },
+                        modifier = focusModifier()
+                            .weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        isError = errorNomorPolisi.isNotEmpty(),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    )
+                }
                 if (errorNomorPolisi.isNotEmpty()) Text(
                     text = errorNomorPolisi,
                     color = Color.Red,
@@ -260,7 +314,7 @@ object AddCustomer : Screen {
                     onValueChange = {
                         tahun = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(
@@ -276,7 +330,7 @@ object AddCustomer : Screen {
                     onValueChange = {
                         silinder = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(
@@ -292,7 +346,7 @@ object AddCustomer : Screen {
                     onValueChange = {
                         warna = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -305,7 +359,7 @@ object AddCustomer : Screen {
                     onValueChange = {
                         noRangka = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(
@@ -321,7 +375,7 @@ object AddCustomer : Screen {
                     onValueChange = {
                         noMesin = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(
@@ -337,7 +391,7 @@ object AddCustomer : Screen {
                     onValueChange = {
                         keterangan = it
                     },
-                    modifier = Modifier
+                    modifier = focusModifier()
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
@@ -362,7 +416,7 @@ object AddCustomer : Screen {
                             errorMerk = "Merk tidak boleh kosong."
                             return@Button
                         }
-                        if (nomorpolisi.isEmpty()) {
+                        if (nomorpolisi.contains("")) {
                             errorNomorPolisi = "No. Polisi tidak boleh kosong."
                             return@Button
                         }
@@ -374,15 +428,16 @@ object AddCustomer : Screen {
                                 createdBy = "Feri",
                             ),
                             mobil = Mobil(
-                                merk = merk,
-                                nopol = nomorpolisi, tipe = tipe,
-                                tahun = tahun,
-                                silinder = silinder,
-                                warna = warna,
-                                norangka = noRangka,
-                                nomesin = noMesin,
-                                keterangan = keterangan,
-                                createdBy = "Feri",
+                                merk = merk.trim(),
+                                nopol = nomorpolisi.joinToString(" ").trim(),
+                                tipe = tipe.trim(),
+                                tahun = tahun.trim(),
+                                silinder = silinder.trim(),
+                                warna = warna.trim(),
+                                norangka = noRangka.trim(),
+                                nomesin = noMesin.trim(),
+                                keterangan = keterangan.trim(),
+                                createdBy = user?.email,
                             ),
                             isLoading = { isLoading = it },
                             onSuccess = {

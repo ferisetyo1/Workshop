@@ -1,5 +1,6 @@
 package com.feri.workshop
 
+import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,6 +13,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.feri.workshop.component.screen.*
 import com.feri.workshop.component.sheet.BiayaLainnya
@@ -23,6 +25,7 @@ import com.feri.workshop.component.viewmodel.ProdukViewModel
 import com.feri.workshop.component.viewmodel.RentangTanggalViewModel
 import com.feri.workshop.component.viewmodel.TransaksiViewModel
 import com.feri.workshop.ui.helper.BottomNavigationBar
+import com.feri.workshop.ui.helper.permission
 import com.feri.workshop.ui.theme.WorkshopTheme
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -31,6 +34,7 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -43,6 +47,7 @@ class MainActivity : ComponentActivity() {
     val customerViewModel by viewModels<CustomerViewModel>()
     val produkViewModel by viewModels<ProdukViewModel>()
 
+    @OptIn(ExperimentalPermissionsApi::class)
     @ExperimentalMaterialNavigationApi
     @ExperimentalAnimationApi
     @ExperimentalComposeUiApi
@@ -62,7 +67,7 @@ class MainActivity : ComponentActivity() {
                     Scaffold(bottomBar = {
                         if (showBottomBar) BottomNavigationBar(
                             navController = navController,
-                            items = listOf(Beranda, ManagementProduk, Reminder, Profile),
+                            items = listOf(Beranda, ManagementProduk, Profile),
                             onItemClick = {
                                 navController.navigate(it.routeName) {
                                     if (it.routeName != Beranda.routeName) {
@@ -73,6 +78,13 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }) {
+                        permission(
+                            list = listOf(
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.MANAGE_EXTERNAL_STORAGE
+                            )
+                        )
                         AnimatedNavHost(
                             navController = navController,
                             startDestination = Splash.routeName,
@@ -100,7 +112,14 @@ class MainActivity : ComponentActivity() {
                                 DetailMobil,
                                 AddProduk,
                                 AddKategoriProduk,
-                                DetailProduk
+                                DetailProduk,
+                                GantiPassword,
+                                Register,
+                                SuccessRegister,
+                                ForgotPassword,
+                                SuccessSentMail,
+                                UserManage,
+                                PersonSetting
                             ).forEach { screen ->
                                 composable(screen.routeName,
                                     enterTransition = {

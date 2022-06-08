@@ -16,8 +16,8 @@ android {
         minSdk 24
         targetSdk 31
         versionCode 1
-        versionName "1.0"
-        setArchivesBaseName("WorkshopApps_12_02_2022")
+        versionName "1.0.20220608"
+        setArchivesBaseName("WorkshopApps_"+versionName)
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -79,6 +79,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager:0.24.3-alpha"
     implementation "com.google.accompanist:accompanist-flowlayout:0.24.3-alpha"
     implementation "com.google.accompanist:accompanist-navigation-material:0.24.3-alpha"
+    implementation "com.google.accompanist:accompanist-permissions:0.24.3-alpha"
     // Coil
     implementation "io.coil-kt:coil-compose:1.4.0"
     implementation "com.google.accompanist:accompanist-coil:0.15.0"
@@ -96,4 +97,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
 
+    implementation 'com.github.elirehema:worksheet:0.0.1'
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }

@@ -9,6 +9,7 @@ data class Stock(
     val produkId: String? = null,
     val jumlah: Long? = null,
     val deskripsi: String? = null,
+    val isJual: Boolean? = false,
     val createdAt: Long? = Date().time,
     val createdBy: String? = null,
 )

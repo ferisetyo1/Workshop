@@ -10,6 +10,7 @@ data class Person(
     val nohp: String? = null,
     val alamat: String? = null,
     val noktp: String? = null,
+    val active: Boolean? = null,
     val canAddProduk:Boolean?=null,
     val canEditProduk:Boolean?=null,
     val canDeleteProduk:Boolean?=null,

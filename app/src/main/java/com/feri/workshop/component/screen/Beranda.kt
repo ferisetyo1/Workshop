@@ -11,9 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.outlined.Analytics
-import androidx.compose.material.icons.outlined.Assessment
-import androidx.compose.material.icons.outlined.PersonAddAlt
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +34,7 @@ import com.feri.workshop.ui.helper.spacerV
 import com.feri.workshop.ui.theme.PrimaryColor
 import com.feri.workshop.utils.isDateInCurrentMonth
 import com.feri.workshop.utils.toFormattedString
+import com.feri.workshop.utils.toRupiahCurrency
 import java.util.*
 
 object Beranda : Screen {
@@ -101,7 +100,11 @@ object Beranda : Screen {
                         Column(
                             modifier = Modifier
                                 .weight(1f)
-                                .clickable { navController.navigate(AntrianService.routeName) },
+                                .clickable {
+                                    transaksiVM.selectedType.value = "Hari ini"
+                                    transaksiVM.selectedStatus.value = "Semua"
+                                    navController.navigate(AntrianService.routeName)
+                                },
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(text = "Order Hari Ini", fontSize = 12.sp)
@@ -113,32 +116,36 @@ object Beranda : Screen {
                             }.size.toString(), fontSize = 18.sp, fontWeight = FontWeight.W500)
                         }
                     }
-                    val menunggu=listTransaksi.filter {
+                    val menunggu = listTransaksi.filter {
                         DateUtils.isToday(
                             it.createdAt ?: 0
-                        )&&it.status==Transaksi.STATUS.Menunggu
+                        ) && it.status == Transaksi.STATUS.Menunggu
                     }.size
-                    if (menunggu>0){
+                    if (menunggu > 0) {
                         spacerV(height = 8.dp)
                         Text(
                             text = "$menunggu orderan menunggu konfirmasi*",
                             fontSize = 12.sp,
                             fontStyle = FontStyle.Italic,
-                            modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp)
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(horizontal = 16.dp)
                         )
                     }
-                    val process=listTransaksi.filter {
+                    val process = listTransaksi.filter {
                         DateUtils.isToday(
                             it.createdAt ?: 0
-                        )&&it.status==Transaksi.STATUS.Menunggu
+                        ) && it.status == Transaksi.STATUS.Menunggu
                     }.size
-                    if (process>0){
-                        if (menunggu==0) spacerV(height = 8.dp)
+                    if (process > 0) {
+                        if (menunggu == 0) spacerV(height = 8.dp)
                         Text(
                             text = "$process orderan sedang diproses*",
                             fontSize = 12.sp,
                             fontStyle = FontStyle.Italic,
-                            modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp)
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(horizontal = 16.dp)
                         )
                     }
                     spacerV(height = 8.dp)
@@ -175,20 +182,25 @@ object Beranda : Screen {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { navController.navigate(FindCustomer.routeName) }) {
+                    modifier = Modifier.clickable {
+                        transaksiVM.selectedType.value = "Semua"
+                        transaksiVM.selectedStatus.value = Transaksi.STATUS.Selesai
+                        navController.navigate(AntrianService.routeName)
+                    }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_inventory_black_24dp_1),
                         contentDescription = ""
                     )
-                    Text(text = "Buat\nPesanan", textAlign = TextAlign.Center)
+                    Text(text = "History\nPesanan", textAlign = TextAlign.Center)
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { navController.navigate(UserManage.routeName) }) {
                     Icon(
-                        imageVector = Icons.Outlined.Analytics,
+                        imageVector = Icons.Outlined.Groups,
                         contentDescription = "",
                         modifier = Modifier.size(35.dp)
                     )
-                    Text(text = "Catatan\nFinansial", textAlign = TextAlign.Center)
+                    Text(text = "User\nManagemen", textAlign = TextAlign.Center)
                 }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -215,7 +227,9 @@ object Beranda : Screen {
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .align(Alignment.CenterHorizontally)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { navController.navigate(RingkasanTransaksi.routeName) },
                 backgroundColor = PrimaryColor.copy(alpha = 0.75f),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -229,33 +243,47 @@ object Beranda : Screen {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(text = "Total Penjualan", fontSize = 12.sp)
                             spacerV(height = 8.dp)
-                            Text(text = "Rp9.100.000", fontWeight = FontWeight.W700)
+                            Text(
+                                text = listTransaksiSelesai.filter {
+                                    it.paidValue == it.getTotal() && Date(
+                                        it.createdAt ?: 0
+                                    ).isDateInCurrentMonth()
+                                }.sumOf { it.getTotal() }.toRupiahCurrency(),
+                                fontWeight = FontWeight.W700
+                            )
                             spacerV(height = 8.dp)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.TrendingUp,
-                                    contentDescription = "",
-                                    tint = Color.Green
-                                )
-                                Text(text = " 63,52%")
-                            }
-                            Text(text = "vs bulan lalu", fontSize = 11.sp)
+//                            Row(verticalAlignment = Alignment.CenterVertically) {
+//                                Icon(
+//                                    imageVector = Icons.Default.TrendingUp,
+//                                    contentDescription = "",
+//                                    tint = Color.Green
+//                                )
+//                                Text(text = " 63,52%")
+//                            }
+                            Text(text = "di bulan ini", fontSize = 11.sp)
                         }
                         spacerH(width = 16.dp)
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = "Total Pengeluaran", fontSize = 12.sp)
+                            Text(text = "Total Credit", fontSize = 12.sp)
                             spacerV(height = 8.dp)
-                            Text(text = "Rp9.100.000", fontWeight = FontWeight.W700)
+                            Text(
+                                text = listTransaksiSelesai.filter {
+                                    it.paidValue != it.getTotal() && Date(
+                                        it.createdAt ?: 0
+                                    ).isDateInCurrentMonth()
+                                }.sumOf { it.getTotal() }.toRupiahCurrency(),
+                                fontWeight = FontWeight.W700
+                            )
                             spacerV(height = 8.dp)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.TrendingDown,
-                                    contentDescription = "",
-                                    tint = Color.Red
-                                )
-                                Text(text = " 63,52%")
-                            }
-                            Text(text = "vs bulan lalu", fontSize = 11.sp)
+//                            Row(verticalAlignment = Alignment.CenterVertically) {
+//                                Icon(
+//                                    imageVector = Icons.Default.TrendingDown,
+//                                    contentDescription = "",
+//                                    tint = Color.Red
+//                                )
+//                                Text(text = " 63,52%")
+//                            }
+                            Text(text = "di bulan ini", fontSize = 11.sp)
                         }
                     }
                     spacerV(height = 16.dp)

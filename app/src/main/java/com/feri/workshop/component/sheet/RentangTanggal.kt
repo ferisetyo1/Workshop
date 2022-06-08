@@ -19,8 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.feri.workshop.ui.helper.focusModifier
 import com.feri.workshop.ui.helper.spacerV
-import com.feri.workshop.utils.toDateorNull
 import com.feri.workshop.utils.toFormattedString
 import java.util.*
 
@@ -63,7 +63,7 @@ object RentangTanggal : Sheets {
                 onValueChange = {},
                 readOnly = true,
                 shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = focusModifier().fillMaxWidth(),
                 trailingIcon = {
                     IconButton(
                         onClick = {
@@ -93,7 +93,7 @@ object RentangTanggal : Sheets {
                 onValueChange = {},
                 readOnly = true,
                 shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = focusModifier().fillMaxWidth(),
                 trailingIcon = {
                     IconButton(
                         onClick = {

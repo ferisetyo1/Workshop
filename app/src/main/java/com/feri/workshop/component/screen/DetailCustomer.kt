@@ -26,10 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.feri.workshop.MainActivity
 import com.feri.workshop.data.model.Mobil
-import com.feri.workshop.ui.helper.dividerSmallH
-import com.feri.workshop.ui.helper.screenLoading
-import com.feri.workshop.ui.helper.spacerH
-import com.feri.workshop.ui.helper.spacerV
+import com.feri.workshop.ui.helper.*
 import com.feri.workshop.utils.capitalizeWords
 import com.feri.workshop.utils.showToast
 import com.feri.workshop.utils.toFormattedString
@@ -125,9 +122,9 @@ object DetailCustomer : Screen {
                             value = namapelanggan,
                             onValueChange = {
                                 errorNamaPelanggan = ""
-                                namapelanggan = it
+                                namapelanggan = it.uppercase()
                             },
-                            modifier = Modifier
+                            modifier = focusModifier()
                                 .fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
                             isError = errorNamaPelanggan.isNotEmpty(),
@@ -150,7 +147,7 @@ object DetailCustomer : Screen {
                                 errorPhoneNumber = ""
                                 nomortelfon = it
                             },
-                            modifier = Modifier
+                            modifier = focusModifier()
                                 .fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
                             isError = errorPhoneNumber.isNotEmpty(),
@@ -176,7 +173,7 @@ object DetailCustomer : Screen {
                                 errorAlamat = ""
                                 alamat = it
                             },
-                            modifier = Modifier
+                            modifier = focusModifier()
                                 .fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
                             isError = errorAlamat.isNotEmpty(),
@@ -288,10 +285,8 @@ object DetailCustomer : Screen {
                     Text(text = "Mobil", fontSize = 12.sp)
                     spacerV(height = 8.dp)
                     Text(
-                        text = item.merk.orEmpty().lowercase()
-                            .capitalizeWords() + " • " + item.nopol.orEmpty().lowercase()
-                            .capitalizeWords() + " • " + item.tahun.orEmpty().lowercase()
-                            .capitalizeWords(),
+                        text = item.merk.orEmpty()
+                            .capitalizeWords() + " • " + item.nopol.orEmpty().uppercase() + " • " + item.tahun.orEmpty(),
                         fontSize = 16.sp, fontWeight = FontWeight.W600
                     )
                     spacerV(height = 12.dp)

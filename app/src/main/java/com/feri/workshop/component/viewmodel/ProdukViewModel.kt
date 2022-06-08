@@ -4,6 +4,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.feri.workshop.data.WorkshopRepository
 import com.feri.workshop.data.model.*
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -141,7 +143,8 @@ class ProdukViewModel @Inject constructor(private val repository: WorkshopReposi
                 stocks.remove(stock)
                 selectedproduct.value = selectedproduct.value?.copy(stocks = stocks)
                 listProduk()
-            }, onFailed = onFailed)
+            }, onFailed = onFailed
+        )
     }
 
     fun editProduk(
@@ -156,6 +159,23 @@ class ProdukViewModel @Inject constructor(private val repository: WorkshopReposi
             onSuccess = {
                 onSuccess()
                 selectedproduct.value = produk
+                listProduk()
+            }, onFailed = onFailed
+        )
+    }
+
+    fun removeProduck(
+        selectedProduk: Produk,
+        isLoading: (Boolean) -> Unit = {},
+        onSuccess: () -> Unit = {},
+        onFailed: (String) -> Unit = {}
+    ) {
+        repository.editProduk(
+            selectedProduk.copy(deletedBy = Firebase.auth.currentUser?.email),
+            isLoading = isLoading,
+            onSuccess = {
+                onSuccess()
+                selectedproduct.value = null
                 listProduk()
             }, onFailed = onFailed
         )

@@ -63,3 +63,14 @@ fun String?.toDateorNull(
 fun String?.toColor():Color{
     return Color(android.graphics.Color.parseColor(this))
 }
+
+fun String?.removedat():String{
+    this?.let {
+        return if (it.contains("@")){
+            it.split("@")[0]
+        }else{
+            it
+        }
+    }?:
+    return ""
+}

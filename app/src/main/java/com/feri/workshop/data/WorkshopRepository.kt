@@ -19,7 +19,6 @@ class WorkshopRepository @Inject constructor(
     @ApplicationContext private val appContext: Context,
 ) {
     val firestore = Firebase.firestore
-    val userCollection = firestore.collection("user")
     val produkCollection = firestore.collection("produk")
     val kategoriProdukCollection = firestore.collection("kategoriProduk")
     val customerCollection = firestore.collection("customer")
@@ -93,7 +92,9 @@ class WorkshopRepository @Inject constructor(
                                 }
                             }
                     } else {
-                        if (it.result.documents.first().toObject(Customer::class.java)?.id == customer.id) {
+                        if (it.result.documents.first()
+                                .toObject(Customer::class.java)?.id == customer.id
+                        ) {
                             customerCollection.document(customer.id.orEmpty()).set(customer)
                                 .addOnCompleteListener {
                                     isLoading(false)
@@ -388,6 +389,24 @@ class WorkshopRepository @Inject constructor(
             }
     }
 
+    fun removeProduk(
+        produk: Produk,
+        isLoading: (Boolean) -> Unit,
+        onSuccess: () -> Unit,
+        onFailed: (String) -> Unit
+    ) {
+        isLoading(true)
+        produkCollection.document(produk.id.orEmpty())
+            .delete().addOnCompleteListener {
+                isLoading(false)
+                if (it.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailed(it.exception?.message.orEmpty())
+                }
+            }
+    }
+
     fun searchCustomerDanMobil(
         notelp: String,
         nopol: String,
@@ -408,8 +427,10 @@ class WorkshopRepository @Inject constructor(
                                     if (taskMobil.result.documents.isNotEmpty()) {
                                         val mobil = taskMobil.result.documents.first()
                                         customer.toObject(Customer::class.java)
-                                            ?.let { mobil!!.toObject(Mobil::class.java)
-                                                ?.let { it1 -> onSuccess(it, it1) } }
+                                            ?.let {
+                                                mobil!!.toObject(Mobil::class.java)
+                                                    ?.let { it1 -> onSuccess(it, it1) }
+                                            }
                                     } else {
                                         onFailed("Data mobil tidak ditemukan")
                                     }
@@ -443,11 +464,13 @@ class WorkshopRepository @Inject constructor(
                                 produk = it.produk!!,
                                 stock = Stock(
                                     jumlah = -(it.jumlah?.toLong() ?: 0),
-                                    deskripsi = "Digunakan untuk transaksi ${transaksi.id}"
+                                    deskripsi = "Digunakan untuk transaksi ${transaksi.id}",
+                                    isJual = true
                                 )
                             )
                         }
                         addMobil(mobil = transaksi.mobil!!.copy(lastTransaksion = Date().time))
+                        updateCustomer(customer = transaksi.customer!!.copy(lastTransaksion = Date().time))
                     }
                     onSuccess()
                 } else {
@@ -490,6 +513,20 @@ class WorkshopRepository @Inject constructor(
             .addOnCompleteListener {
                 isLoading(false)
                 if (it.isSuccessful) {
+                    if (transaksi.status == Transaksi.STATUS.Dibatalkan) {
+                        transaksi.carts?.forEach {
+                            it.produk?.let { it1 ->
+                                addStock(
+                                    produk = it1,
+                                    stock = Stock(
+                                        jumlah = it.jumlah?.toLong() ?: 0,
+                                        deskripsi = "Transaksi ${transaksi.id} dibatalkan",
+                                        isJual = true
+                                    )
+                                )
+                            }
+                        }
+                    }
                     onSuccess()
                 } else {
                     onFailed(it.exception?.message.orEmpty())
@@ -513,4 +550,22 @@ class WorkshopRepository @Inject constructor(
                 }
             }
     }
+
+    fun createPerson(
+        person: Person,
+        isLoading: (Boolean) -> Unit,
+        onSuccess: () -> Unit,
+        onFailed: (String) -> Unit
+    ) {
+        isLoading(true)
+        personCollection.document(person.email.orEmpty()).set(person).addOnCompleteListener {
+            isLoading(false)
+            if (it.isSuccessful) {
+                onSuccess()
+            } else {
+                onFailed(it.exception?.message.orEmpty())
+            }
+        }
+    }
+
 }

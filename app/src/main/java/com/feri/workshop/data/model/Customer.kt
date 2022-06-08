@@ -11,5 +11,6 @@ data class Customer(
     val alamat: String? = null,
     val createdAt: Long? = Date().time,
     val createdBy: String? = null,
-    val isdelete: Boolean?=false
+    val isdelete: Boolean?=false,
+    val lastTransaksion:Long?=null
 )
